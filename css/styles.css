@@ -324,13 +324,16 @@ button {
   justify-content: center;
   overflow: hidden;
   flex-shrink: 0;
-  border-radius: 4px !important;
+  border-radius: 6px !important;
+  padding: 0;
 }
 
 .flag-placeholder img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  border-radius: inherit;
+  display: block;
 }
 
 .team-name {
@@ -517,6 +520,7 @@ button {
   align-items: stretch;
   justify-content: center;
   min-width: fit-content;
+  margin: 0 auto;
   padding: 0 var(--space-sm);
 }
 
@@ -557,21 +561,26 @@ button {
   padding: 4px 0;
 }
 
-/* Match Card - Compacto */
+/* Match Card - Minimalista e Vertical */
 .match-card {
   margin: 4px 0;
   border: 1px solid var(--border-color);
   background: rgba(253, 252, 248, 0.8);
+  display: flex;
+  flex-direction: row; /* Times lado a lado dentro do cartao, ou em cima/embaixo dependendo da preferência? A instrucao pede "alinhar vertical", ou seja, a imagem sobre a sigla. */
+  /* Vamos colocar lado a lado, ou empilhado? Originalmente era flex-direction: column para o card (herdado). Manter coluna. */
+  flex-direction: column;
 }
 
 .match-team {
   display: flex;
+  flex-direction: column; /* VERTICAL: Bandeira em cima, Texto embaixo */
   align-items: center;
-  gap: 6px;
-  padding: 4px 8px; /* Pad. reduzido */
+  justify-content: center;
+  gap: 4px;
+  padding: 8px 4px; /* Padding vertical generoso para a bolinha respirar */
   cursor: pointer;
   border-bottom: 1px solid var(--border-color);
-  min-height: 32px; /* Altura compacta */
   border-radius: 0 !important;
 }
 
@@ -596,51 +605,39 @@ button {
   opacity: 0.4;
 }
 
-/* Flag minificada para mata-mata */
+/* Flag Circular Aumentada para o Mata-Mata */
 .match-team .flag-placeholder {
-  width: 24px;
-  height: 16px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50% !important; /* Totalmente redonda */
+  border: 1px solid var(--border-color);
+  background: transparent;
 }
 
-/* Empty Match Slot (Placeholders) */
+/* Slot Vazio (Placeholders Minimalistas) */
 .match-team.empty {
   cursor: default;
-  border-bottom: 1px dashed var(--color-blue);
-  opacity: 0.7;
-}
-
-.match-team.empty:last-child {
-  border-bottom: none;
-}
-
-.match-card:has(.empty) {
-  border: 1px dashed var(--color-blue);
+  opacity: 1; /* Sem opacidade forte para manter o fundo cinza sólido */
 }
 
 .match-team.empty:hover {
   background: transparent;
 }
 
+/* Círculo Cinza Discreto quando vazio */
+.match-team.empty .flag-placeholder {
+  background-color: #e2e8f0;
+  border: none;
+}
+
+/* Tipografia Abaixo da Bandeira */
 .match-team .match-team-name {
-  font-size: 0.8rem; /* Font compacta para Sigla */
+  font-size: 0.75rem; 
   font-weight: 700;
   text-transform: uppercase;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
   color: var(--color-blue);
-}
-
-.match-team.empty .match-team-name {
-  font-size: 0.7rem;
-  font-style: italic;
-  font-weight: 500;
-  color: var(--color-blue);
-}
-
-.match-team.empty .flag-placeholder {
-  border: 1px dashed var(--color-blue);
-  background: transparent;
+  letter-spacing: 0.05em;
+  margin-top: 2px;
 }
 
 /* ── Champion Section ── */
@@ -649,8 +646,8 @@ button {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-width: 220px;
-  padding: var(--space-md);
+  min-width: 140px; /* Reduzido de 220px para acompanhar a compactação */
+  padding: var(--space-sm);
   background: transparent;
 }
 
@@ -665,21 +662,23 @@ button {
 
 /* Placeholder da Taça quando vazio */
 .champion-card.empty-champion {
+  background-color: rgba(253, 252, 248, 0.8);
+  position: relative;
+}
+
+/* Taça destacada no pseudo-elemento */
+.champion-card.empty-champion::before {
+  content: '';
+  position: absolute;
+  top: 10%; left: 10%; right: 10%; bottom: 10%;
   background-image: url('https://s3.glbimg.com/v1/AUTH_08fb001c60b847468664307c11fa9dc9/public/2025/11/jApPDxdqsceQ9kM8X4cr.svg');
   background-size: contain;
   background-position: center;
   background-repeat: no-repeat;
-  /* Cria uma mescla leve e reduz opacidade visual para parecer marca d'água/fundo */
-  background-blend-mode: luminosity;
-}
-/* Camada transparente por cima para suavizar se quisermos */
-.champion-card.empty-champion::before {
-  content: '';
-  position: absolute;
-  top:0; left:0; right:0; bottom:0;
-  background: rgba(253, 252, 248, 0.85);
+  opacity: 0.85; /* Alta opacidade e destaque conforme solicitado */
   z-index: 0;
 }
+
 .champion-card.empty-champion > * {
   position: relative;
   z-index: 1;
@@ -720,6 +719,7 @@ button {
   background: transparent;
   overflow: hidden;
   border-radius: 6px !important;
+  padding: 0;
 }
 
 .champion-card.has-winner .champion-flag-box {
@@ -730,6 +730,8 @@ button {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  border-radius: inherit;
+  display: block;
 }
 
 .champion-name {

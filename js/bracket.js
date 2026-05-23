@@ -343,11 +343,9 @@ const BracketModule = (() => {
 
   function renderMatchTeam(matchId, team, winnerId, seedLabel) {
     if (!team) {
-      const label = getSeedLabel(seedLabel);
       return `
         <div class="match-team empty">
           <div class="flag-placeholder"></div>
-          <span class="match-team-name">${label || 'A DEFINIR'}</span>
         </div>
       `;
     }

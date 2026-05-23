@@ -4,6 +4,7 @@
    ═══════════════════════════════════════════════════════ */
 
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,900;1,900&display=swap');
 
 /* ── CSS Custom Properties ── */
 :root {
@@ -120,6 +121,282 @@ button {
   height: auto;
   object-fit: cover;
   display: block;
+}
+
+/* ═══════ NATIVE INTERSTITIAL BANNER ═══════ */
+.native-interstitial-banner {
+  position: relative;
+  width: 100%;
+  height: 220px;
+  background-color: #012562;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  font-family: 'Archivo', sans-serif;
+}
+
+.interstitial-block {
+  display: flex;
+  flex-direction: column;
+  width: max-content; /* O bloco engloba exatamente a largura do texto central */
+  max-width: 95%;
+  gap: 35px;
+}
+
+.interstitial-stripe {
+  width: 100%;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background-color: transparent;
+  color: #fcc302;
+  font-weight: 900;
+  font-size: 1rem;
+  letter-spacing: 0.2em;
+  white-space: nowrap;
+}
+
+.interstitial-stripe.top {
+  border-bottom: 2px solid #fcc302;
+  margin-bottom: 10px;
+  border-radius: 0px !important;
+}
+
+.interstitial-stripe.bottom {
+  border-top: 2px solid #fcc302;
+  margin-top: 10px;
+  border-radius: 0px !important;
+}
+
+.interstitial-center {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  flex-wrap: nowrap;
+  font-size: 6vw; /* Base fluida */
+  white-space: nowrap;
+  line-height: 1;
+}
+
+.word-ato, .word-mundo {
+  color: #fcc302;
+  font-weight: 900;
+  font-style: normal;
+}
+
+.word-dot {
+  color: #017a36;
+  font-weight: 900;
+  font-style: normal;
+}
+
+.word-na, .word-do {
+  color: #fdfcf8;
+  font-weight: 900;
+  font-style: italic;
+  font-size: 0.7em; /* 70% do tamanho para criar hierarquia visual */
+  margin: 0 0.3em;
+}
+
+.word-copa {
+  color: #017a36;
+  font-weight: 900;
+  font-style: normal;
+}
+
+/* Responsive Constraints for Interstitial */
+@media (min-width: 1200px) {
+  .interstitial-center {
+    font-size: 3.5rem; /* Imponente e dominante no desktop */
+  }
+}
+
+@media (max-width: 768px) {
+  .native-interstitial-banner {
+    height: 140px; /* Reduced height on mobile */
+  }
+  .interstitial-stripe {
+    height: 20px;
+    font-size: 0.7rem;
+  }
+  .interstitial-center {
+    font-size: 6vw; /* Larger % on mobile to fit text nicely */
+  }
+}
+
+/* ═══════ BANNER 3 (GRID NATIVO) ═══════ */
+.banner3-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  width: 100%;
+  overflow: hidden;
+  /* Altura será controlada via JS ou natural se forem 3 linhas */
+}
+
+.b3-cell {
+  aspect-ratio: 4 / 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0px !important;
+}
+
+.b3-cell img {
+  width: 85%;
+  height: 85%;
+  object-fit: contain;
+  display: block;
+}
+
+/* Utilitários de Cor de Fundo */
+.bg-verde { background-color: #017a36; }
+.bg-amarelo { background-color: #fcc302; }
+.bg-azul { background-color: #012562; }
+
+@media (max-width: 768px) {
+  .banner3-container {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  }
+}
+
+/* ═══════ NATIVE HERO BANNER ═══════ */
+.native-hero-banner {
+  position: relative;
+  width: 100%;
+  height: 360px;
+  background-color: #017a36;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Side Blocks para isolar o Logotipo e cortar as faixas */
+.side-block {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: calc(50% - 225px); /* Deixa exatos 450px livres no centro */
+  overflow: hidden;
+  z-index: 1;
+}
+
+.side-block.left {
+  left: 0;
+}
+
+.side-block.right {
+  right: 0;
+}
+
+.hero-center-logo {
+  position: relative;
+  z-index: 10;
+  width: 80%;
+  max-width: 450px;
+  display: flex;
+  justify-content: center;
+}
+
+.hero-center-logo img {
+  width: 80%;
+  height: auto;
+  display: block;
+  filter: drop-shadow(5px 10px 15px rgba(0, 0, 0, 0.5));
+}
+
+/* Wrapper for Crossed Stripes (Centralizados dentro do Side Block) */
+.stripe-wrapper {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 300%; /* Bem largo para cobrir todo o bloco cruzado */
+  display: flex;
+  flex-direction: column;
+  transform-origin: center;
+  filter: drop-shadow(5px 10px 15px rgba(0, 0, 0, 0.5));
+}
+
+/* Eixo Descendente */
+.wrapper-desc {
+  transform: translate(-50%, -50%) rotate(-38deg);
+  z-index: 1;
+}
+
+/* Eixo Ascendente */
+.wrapper-asc {
+  transform: translate(-50%, -50%) rotate(38deg);
+  z-index: 2; /* Fica por cima do outro eixo */
+}
+
+/* Diagonal Stripes */
+.hero-stripe {
+  position: relative;
+  width: 100%;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  font-family: 'Archivo', sans-serif;
+  font-weight: 900;
+  font-size: 1.2rem;
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+}
+
+.stripe-yellow {
+  background-color: #fcc503;
+  color: #017a36;
+}
+
+.stripe-blue {
+  background-color: #012562;
+  color: #ffffff;
+}
+
+.star {
+  color: #fcc503;
+  margin: 0 10px;
+}
+
+/* Marquee Animation Engine */
+.marquee-wrapper {
+  display: flex;
+  white-space: nowrap;
+  width: fit-content;
+  animation: marquee-slide 10s linear infinite;
+}
+
+.marquee-content {
+  padding-right: 15px;
+}
+
+@keyframes marquee-slide {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .native-hero-banner {
+    height: 240px;
+  }
+  
+  .side-block {
+    width: 25%; /* No mobile as laterais são menores */
+  }
+
+  .stripe-wrapper {
+    width: 300%; 
+  }
+
+  .hero-stripe {
+    font-size: 0.9rem;
+    height: 30px;
+  }
 }
 
 /* ═══════════════════════════
@@ -411,6 +688,10 @@ button {
   background: transparent;
   border-top: 1px solid var(--border-color);
   border-radius: 0 !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 .group-shuffle-btn:hover {
@@ -539,12 +820,12 @@ button {
   min-width: 140px; /* Reduzido para compactação */
   padding: 0 var(--space-sm);
   position: relative;
-  border-right: 1px solid var(--border-color);
+  border-right: none;
 }
 
 .bracket-side.right .bracket-phase {
   border-right: none;
-  border-left: 1px solid var(--border-color);
+  border-left: none;
 }
 
 .bracket-phase-label {
@@ -561,83 +842,112 @@ button {
   padding: 4px 0;
 }
 
-/* Match Card - Minimalista e Vertical */
+/* ── Esqueleto da Chave e Linhas Tracejadas ── */
 .match-card {
-  margin: 4px 0;
-  border: 1px solid var(--border-color);
-  background: rgba(253, 252, 248, 0.8);
+  margin: 12px 0;
   display: flex;
-  flex-direction: row; /* Times lado a lado dentro do cartao, ou em cima/embaixo dependendo da preferência? A instrucao pede "alinhar vertical", ou seja, a imagem sobre a sigla. */
-  /* Vamos colocar lado a lado, ou empilhado? Originalmente era flex-direction: column para o card (herdado). Manter coluna. */
   flex-direction: column;
-}
-
-.match-team {
-  display: flex;
-  flex-direction: column; /* VERTICAL: Bandeira em cima, Texto embaixo */
   align-items: center;
-  justify-content: center;
-  gap: 4px;
-  padding: 8px 4px; /* Padding vertical generoso para a bolinha respirar */
+  justify-content: space-around;
+  min-height: 100px;
+  position: relative;
+  background: transparent;
+  border: none; 
+}
+
+/* Lado Esquerdo - Linhas fluindo para a direita */
+.bracket-side.left .match-card::after {
+  content: '';
+  position: absolute;
+  top: 25%;
+  bottom: 25%;
+  right: -20px;
+  width: 20px;
+  border-top: 1px dashed var(--color-blue);
+  border-bottom: 1px dashed var(--color-blue);
+  border-right: 1px dashed var(--color-blue);
+  z-index: 1;
+}
+
+.bracket-side.left .match-card::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: -40px;
+  width: 20px;
+  border-top: 1px dashed var(--color-blue);
+  z-index: 1;
+}
+
+/* Lado Direito - Linhas fluindo para a esquerda */
+.bracket-side.right .match-card::after {
+  content: '';
+  position: absolute;
+  top: 25%;
+  bottom: 25%;
+  left: -20px;
+  width: 20px;
+  border-top: 1px dashed var(--color-blue);
+  border-bottom: 1px dashed var(--color-blue);
+  border-left: 1px dashed var(--color-blue);
+  z-index: 1;
+}
+
+.bracket-side.right .match-card::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: -40px;
+  width: 20px;
+  border-top: 1px dashed var(--color-blue);
+  z-index: 1;
+}
+
+/* Ocultar linhas no card da final ou se não houver próximo */
+.bracket-phase[data-phase="f"] .match-card::after,
+.bracket-phase[data-phase="f"] .match-card::before {
+  display: none;
+}
+
+/* ── Nós Puríssimos (Bolinhas) ── */
+.match-team {
+  width: 40px; 
+  height: 40px;
+  border-radius: 50% !important;
+  background-color: #e2e8f0; 
+  display: inline-block;
+  position: relative;
+  z-index: 2; /* Garante que fique por cima da linha tracejada */
   cursor: pointer;
-  border-bottom: 1px solid var(--border-color);
-  border-radius: 0 !important;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 0 0 4px var(--bg-global); /* Efeito de recorte afastado da linha */
+  overflow: hidden;
+  padding: 0;
+  transition: all var(--transition-smooth);
 }
 
-.match-team:last-child {
-  border-bottom: none;
+.match-team img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
-.match-team:hover {
-  background: rgba(1,37,98,0.05);
+.match-team.empty-node {
+  border: none;
+}
+
+.match-team.empty-node:hover {
+  opacity: 0.8;
 }
 
 .match-team.winner {
-  background: var(--color-blue);
-  color: var(--bg-global);
-}
-
-.match-team.winner .match-team-name {
-  color: var(--bg-global);
+  border-color: var(--color-blue);
+  box-shadow: 0 0 0 2px var(--color-blue), 0 0 0 4px var(--bg-global);
 }
 
 .match-team.loser {
   opacity: 0.4;
-}
-
-/* Flag Circular Aumentada para o Mata-Mata */
-.match-team .flag-placeholder {
-  width: 40px;
-  height: 40px;
-  border-radius: 50% !important; /* Totalmente redonda */
-  border: 1px solid var(--border-color);
-  background: transparent;
-}
-
-/* Slot Vazio (Placeholders Minimalistas) */
-.match-team.empty {
-  cursor: default;
-  opacity: 1; /* Sem opacidade forte para manter o fundo cinza sólido */
-}
-
-.match-team.empty:hover {
-  background: transparent;
-}
-
-/* Círculo Cinza Discreto quando vazio */
-.match-team.empty .flag-placeholder {
-  background-color: #e2e8f0;
-  border: none;
-}
-
-/* Tipografia Abaixo da Bandeira */
-.match-team .match-team-name {
-  font-size: 0.75rem; 
-  font-weight: 700;
-  text-transform: uppercase;
-  color: var(--color-blue);
-  letter-spacing: 0.05em;
-  margin-top: 2px;
 }
 
 /* ── Champion Section ── */
@@ -685,14 +995,33 @@ button {
 }
 
 .champion-card.has-winner {
-  background: var(--color-yellow);
+  background: transparent; /* Remove amarelo sólido de fundo */
   color: var(--color-blue);
-  border: 1px solid var(--color-yellow);
-  background-image: none; /* remove taça fundo e exibe real winner */
+  border: 1px dashed var(--color-yellow);
+  position: relative;
+}
+
+.champion-card.has-winner::before {
+  content: '';
+  position: absolute;
+  top: 10%; left: 10%; right: 10%; bottom: 10%;
+  background-image: url('https://s3.glbimg.com/v1/AUTH_08fb001c60b847468664307c11fa9dc9/public/2025/11/jApPDxdqsceQ9kM8X4cr.svg');
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  filter: brightness(0) saturate(100%) invert(87%) sepia(89%) saturate(5743%) hue-rotate(333deg) brightness(109%) contrast(94%);
+  opacity: 1;
+  z-index: 0;
+}
+
+.champion-card.has-winner > * {
+  position: relative;
+  z-index: 1;
 }
 
 .champion-card.has-winner .champion-name {
   color: var(--color-blue);
+  text-shadow: 0px 0px 8px rgba(253, 252, 248, 0.9); /* Destaque no texto sobre a taça */
 }
 
 .champion-card.has-winner .champion-label {
@@ -767,6 +1096,15 @@ button {
   background: var(--bg-global);
   color: var(--color-blue);
   letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.action-btn svg, .group-shuffle-btn svg {
+  flex-shrink: 0;
+  stroke: currentColor;
 }
 
 .action-btn:hover {
@@ -785,6 +1123,8 @@ button {
   align-items: center;
   flex-direction: column;
   gap: var(--space-sm);
+  border-radius: 0 !important; /* Sem cantos arredondados na largura infinita */
+  border-top: 1px solid rgba(253, 252, 248, 0.15); /* Divisória sutil elegante */
 }
 
 .footer-text {
@@ -986,6 +1326,102 @@ button {
   .champion-column {
     padding: var(--space-xl) var(--space-md);
     border-bottom: 1px solid var(--border-color);
+  }
+}
+
+/* ═══════ CTA ÁLBUM DA COPA ═══════ */
+.album-cta {
+  background-color: var(--color-blue);
+  color: var(--color-white);
+  width: 100%;
+  border-radius: 0 !important; /* Sem cantos arredondados na largura infinita */
+}
+
+.cta-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  padding: 4rem 2rem;
+}
+
+.album-cta .cta-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+  text-align: center;
+}
+
+.album-cta h2 {
+  font-family: 'Archivo', sans-serif;
+  font-weight: 900;
+  font-size: 2rem;
+  color: var(--color-yellow);
+  text-transform: uppercase;
+}
+
+.album-cta p {
+  font-size: 1.1rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.9);
+  max-width: 600px;
+}
+
+.cta-whatsapp-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  background-color: var(--color-yellow);
+  color: var(--color-blue);
+  padding: 16px 32px;
+  border-radius: 6px;
+  font-weight: 900;
+  font-size: 1rem;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  margin-top: 1rem;
+}
+
+.cta-whatsapp-btn:hover {
+  background-color: #e5b102;
+  transform: translateY(-2px);
+}
+
+.cta-images {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.cta-img-album, .cta-img-stickers {
+  max-width: 250px;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(5px 10px 15px rgba(0, 0, 0, 0.5)); /* Profundidade 3D */
+}
+
+@media (min-width: 1024px) {
+  .cta-inner {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    text-align: left;
+    padding: 4rem var(--space-md);
+  }
+  
+  .cta-inner .cta-content {
+    align-items: flex-start;
+    text-align: left;
+    flex: 1;
+  }
+
+  .cta-images {
+    flex: 1;
+    justify-content: flex-end;
   }
 }
 

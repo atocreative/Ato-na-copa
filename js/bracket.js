@@ -343,11 +343,7 @@ const BracketModule = (() => {
 
   function renderMatchTeam(matchId, team, winnerId, seedLabel) {
     if (!team) {
-      return `
-        <div class="match-team empty">
-          <div class="flag-placeholder"></div>
-        </div>
-      `;
+      return `<div class="match-team flag-placeholder empty-node"></div>`;
     }
 
     const isWinner = winnerId === team.id;
@@ -355,14 +351,13 @@ const BracketModule = (() => {
     const cls = isWinner ? 'winner' : isLoser ? 'loser' : '';
 
     const flagUrl = getFlagUrl(team);
-    const flagHtml = flagUrl
-      ? `<div class="flag-placeholder"><img src="${flagUrl}" alt="${team.id}" loading="lazy"/></div>`
-      : `<div class="flag-placeholder"></div>`;
+    const imgHtml = flagUrl
+      ? `<img src="${flagUrl}" alt="${team.id}" loading="lazy"/>`
+      : '';
 
     return `
-      <div class="match-team ${cls}" data-match-id="${matchId}" data-team-id="${team.id}">
-        ${flagHtml}
-        <span class="match-team-name">${team.id}</span>
+      <div class="match-team flag-placeholder ${cls}" data-match-id="${matchId}" data-team-id="${team.id}">
+        ${imgHtml}
       </div>
     `;
   }

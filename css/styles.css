@@ -1502,23 +1502,27 @@ button {
 
 /* ── Capture Mode (html2canvas) ── */
 .bracket-wrap.capture-mode {
-  width: 1440px !important;
-  min-width: 1440px !important;
-  max-width: 1440px !important;
+  width: 1650px !important;
+  min-width: 1650px !important;
+  max-width: 1650px !important;
   overflow: visible !important;
   background-color: #fdfcf8 !important;
-  padding: 40px !important;
+  padding: 40px 60px !important;
   border-radius: 0 !important;
+  box-sizing: border-box !important;
 }
 
 .bracket-wrap.capture-mode #bracket {
   display: flex !important;
   flex-direction: row !important;
   align-items: stretch !important;
+  justify-content: center !important;
   gap: 46px !important;
   min-height: 920px !important;
   padding-top: 54px !important;
-  width: max-content !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  overflow: visible !important;
 }
 
 .bracket-wrap.capture-mode .bk-column {

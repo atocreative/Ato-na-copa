@@ -414,10 +414,13 @@ const BracketModule = (() => {
         : '';
       const countryName = championTeam.name.toUpperCase();
       // Concordância de gênero: verifica última palavra (sem acentos) ou lista explícita feminina
-      const FEMININE_COUNTRIES = ['COREIA DO SUL', 'ÁFRICA DO SUL', 'NOVA ZELÂNDIA', 'ARÁBIA SAUDITA', 'COSTA DO MARFIM', 'COSTA RICA'];
+      const FEMININE_COUNTRIES = ['COREIA DO SUL', '\u00c1FRICA DO SUL', 'NOVA ZEL\u00c2NDIA', 'AR\u00c1BIA SAUDITA', 'COSTA DO MARFIM', 'COSTA RICA'];
       const lastWord = countryName.normalize('NFD').replace(/\p{Diacritic}/gu, '').split(' ').pop();
-      const champTitle = (lastWord.endsWith('A') || FEMININE_COUNTRIES.includes(countryName)) ? 'CAMPEÃ' : 'CAMPEÃO';
-      champHTML = flagImg + ' ' + countryName + ' ' + champTitle;
+      const champTitle = (lastWord.endsWith('A') || FEMININE_COUNTRIES.includes(countryName)) ? 'CAMPE\u00c3' : 'CAMPE\u00c3O';
+      // Estrutura horizontal: bandeira | nome | título (flex-row via CSS .bk-champion-line)
+      champHTML = flagImg
+        + '<span class="bk-champ-name">' + countryName + '</span>'
+        + '<span class="bk-champ-title">' + champTitle + '</span>';
     } else {
       champHTML = '&nbsp;';
     }
@@ -426,15 +429,15 @@ const BracketModule = (() => {
       '<div class="bk-center-stack">' +
         '<div class="bk-trophy-box" style="margin-bottom:1.5rem;">' +
           '<div class="bk-ato-watermark"></div>' +
-          '<img src="taça.png" alt="Troféu" class="bk-trophy ' + (championTeam ? 'lit' : '') + '">' +
-          '<div class="bk-champion-line" style="margin-top:1.5rem;">' + champHTML + '</div>' +
+          '<img src="ta\u00e7a.png" alt="Trof\u00e9u" class="bk-trophy ' + (championTeam ? 'lit' : '') + '">' +
+          '<div class="bk-champion-line" style="margin-top:1.5rem;display:flex;flex-direction:row;justify-content:center;align-items:center;gap:0.5rem;white-space:nowrap;">' + champHTML + '</div>' +
         '</div>' +
         '<div class="bk-final-wrap">' +
           '<div class="bk-round-title">FINAL</div>' +
           matchHTML('final') +
         '</div>' +
         '<div class="bk-third-wrap" style="margin-top:3rem;">' +
-          '<div class="bk-round-title">DISPUTA 3º LUGAR</div>' +
+          '<div class="bk-round-title">DISPUTA 3\u00ba LUGAR</div>' +
           matchHTML('third_place') +
         '</div>' +
       '</div>';

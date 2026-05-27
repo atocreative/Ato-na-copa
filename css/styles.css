@@ -984,6 +984,13 @@ button {
   color: var(--color-green);
   min-height: 22px;
   text-transform: uppercase;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: nowrap;
+  white-space: nowrap;
 }
 
 .bk-champion-line .bk-champ-flag {
@@ -991,8 +998,30 @@ button {
   height: 34px;
   vertical-align: middle;
   border-radius: 4px !important;
-  margin-right: 8px;
+  margin-right: 0;
   box-shadow: 0 0 0 2px var(--color-green) !important;
+  flex-shrink: 0;
+}
+
+.bk-champ-name {
+  font-family: 'Roboto', sans-serif;
+  font-weight: 900;
+  font-size: 18px;
+  color: var(--color-green);
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  white-space: nowrap;
+}
+
+.bk-champ-title {
+  font-family: 'Roboto', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--color-green);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  white-space: nowrap;
+  opacity: 0.85;
 }
 
 /* Final Match */
@@ -1469,11 +1498,12 @@ button {
 
 /* ── Capture Mode (html2canvas) ── */
 .bracket-wrap.capture-mode {
-  width: 1400px !important;
-  min-width: 1400px !important;
-  max-width: 1400px !important;
+  width: 1500px !important;
+  min-width: 1500px !important;
+  max-width: 1500px !important;
+  overflow: visible !important;
   background-color: #fdfcf8 !important;
-  padding: 24px !important;
+  padding: 24px 40px !important;
   border-radius: 0 !important;
 }
 

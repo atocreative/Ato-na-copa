@@ -623,28 +623,7 @@ const BracketModule = (() => {
       drawLine('M ' + finalR.right + ' ' + finalR.cy + ' L ' + (finalR.right - 2) + ' ' + finalR.cy, { active: active });
     }
 
-    // SEMIFINALS → 3RD PLACE (dashed lines)
-    const thirdR = getMatchRect('third_place');
-    if (semiL && thirdR) {
-      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      path.setAttribute('d', 'M ' + semiL.right + ' ' + (semiL.bottom - 4) + ' L ' + (semiL.right + 14) + ' ' + (semiL.bottom - 4) + ' L ' + (semiL.right + 14) + ' ' + thirdR.cy + ' L ' + thirdR.left + ' ' + thirdR.cy);
-      path.setAttribute('fill', 'none');
-      path.setAttribute('stroke', '#5a7ba8');
-      path.setAttribute('stroke-width', '1.2');
-      path.setAttribute('stroke-dasharray', '3,4');
-      path.setAttribute('opacity', '0.35');
-      svg.appendChild(path);
-    }
-    if (semiR && thirdR) {
-      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      path.setAttribute('d', 'M ' + semiR.left + ' ' + (semiR.bottom - 4) + ' L ' + (semiR.left - 14) + ' ' + (semiR.bottom - 4) + ' L ' + (semiR.left - 14) + ' ' + thirdR.cy + ' L ' + thirdR.right + ' ' + thirdR.cy);
-      path.setAttribute('fill', 'none');
-      path.setAttribute('stroke', '#5a7ba8');
-      path.setAttribute('stroke-width', '1.2');
-      path.setAttribute('stroke-dasharray', '3,4');
-      path.setAttribute('opacity', '0.35');
-      svg.appendChild(path);
-    }
+    // SEMIFINALS → 3RD PLACE (dashed lines removed for cleaner UI)
   }
 
   /* ============================================================

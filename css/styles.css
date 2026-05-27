@@ -976,21 +976,24 @@ button {
 }
 
 .bk-champion-line {
-  margin-top: 8px;
+  margin-top: 12px;
   font-family: 'Roboto', sans-serif;
   font-weight: 700;
-  letter-spacing: 3px;
-  font-size: 18px;
+  letter-spacing: 2px;
+  font-size: 20px;
   color: var(--color-green);
-  min-height: 22px;
+  min-height: 28px;
   text-transform: uppercase;
   display: flex;
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  gap: 0.5rem;
+  gap: 12px;
   flex-wrap: nowrap;
   white-space: nowrap;
+  padding: 6px 12px;
+  background: rgba(2, 123, 53, 0.06);
+  border-radius: 6px !important;
 }
 
 .bk-champion-line .bk-champ-flag {
@@ -1006,10 +1009,10 @@ button {
 .bk-champ-name {
   font-family: 'Roboto', sans-serif;
   font-weight: 900;
-  font-size: 18px;
+  font-size: 20px;
   color: var(--color-green);
   text-transform: uppercase;
-  letter-spacing: 3px;
+  letter-spacing: 2px;
   white-space: nowrap;
 }
 
@@ -1021,7 +1024,7 @@ button {
   text-transform: uppercase;
   letter-spacing: 2px;
   white-space: nowrap;
-  opacity: 0.85;
+  opacity: 0.9;
 }
 
 /* Final Match */
@@ -1067,7 +1070,7 @@ button {
 /* 3rd Place */
 .bk-third-wrap {
   position: absolute;
-  top: calc(100% + 60px);
+  top: calc(100% + 80px);
   left: 50%;
   transform: translateX(-50%);
   width: 100%;
@@ -1081,7 +1084,8 @@ button {
 
 .bk-third-wrap .bk-match {
   background: rgba(1, 37, 98, 0.03);
-  border-style: dashed;
+  border-style: solid;
+  border-color: rgba(1, 37, 98, 0.15);
 }
 
 /* ── ATO Watermark ── */
@@ -1498,12 +1502,12 @@ button {
 
 /* ── Capture Mode (html2canvas) ── */
 .bracket-wrap.capture-mode {
-  width: 1500px !important;
-  min-width: 1500px !important;
-  max-width: 1500px !important;
+  width: 1440px !important;
+  min-width: 1440px !important;
+  max-width: 1440px !important;
   overflow: visible !important;
   background-color: #fdfcf8 !important;
-  padding: 24px 40px !important;
+  padding: 40px !important;
   border-radius: 0 !important;
 }
 
@@ -1543,7 +1547,7 @@ button {
 
 .bracket-wrap.capture-mode .bk-third-wrap {
   position: absolute !important;
-  top: calc(100% + 30px) !important;
+  top: calc(100% + 80px) !important;
   left: 50% !important;
   transform: translateX(-50%) !important;
 }

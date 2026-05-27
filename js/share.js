@@ -1,12 +1,13 @@
 /**
- * Share Module — Print Engine v3 (Infalível)
- * Clonagem isolada + viewport fixo de desktop + overflow visible
- * Evita cortes laterais e linhas invisíveis no mobile
+ * Share Module — Print Engine v4 (Largura 1440px + Linhas Nítidas)
+ * Clonagem isolada em memória com viewport de desktop travado.
+ * Resolve: corte da coluna direita, linhas invisíveis, quebra em mobile.
  */
 const ShareModule = (() => {
 
-  // Largura fixa do clone — deve coincidir com .capture-mode no CSS
-  const CAPTURE_WIDTH = 1500;
+  // ── Constante mestre de largura ──────────────────────────────────────────
+  // Deve coincidir com .bracket-wrap.capture-mode no CSS
+  const CAPTURE_WIDTH = 1440;
 
   function share() {
     const original = document.getElementById('bracket-wrap');
@@ -17,81 +18,93 @@ const ShareModule = (() => {
 
     showToast("📸 GERANDO IMAGEM DA SUA SIMULAÇÃO...", 2500);
 
-    setTimeout(() => {
+    // ── 1. Clonar o bracket-wrap inteiro em memória ──────────────────────
+    const clone = original.cloneNode(true);
+    clone.classList.add('capture-mode');
 
-      // ── 1. Clonar o bracket-wrap em memória ──────────────────────────────
-      const clone = original.cloneNode(true);
-      clone.classList.add('capture-mode');
+    // ── 2. Travar a geometria do clone em largura fixa de desktop ────────
+    // Usando Object.assign para garantir precedência inline sobre media queries
+    Object.assign(clone.style, {
+      position:        'absolute',
+      top:             '-99999px',
+      left:            '-99999px',
+      width:           CAPTURE_WIDTH + 'px',
+      minWidth:        CAPTURE_WIDTH + 'px',
+      maxWidth:        CAPTURE_WIDTH + 'px',
+      height:          'auto',
+      overflow:        'visible',
+      backgroundColor: '#fdfcf8',
+      padding:         '40px',
+      zIndex:          '-9999',
+      pointerEvents:   'none',
+      transform:       'none',
+    });
 
-      // ── 2. Travar geometria do clone em largura fixa de desktop ──────────
-      // Sem isso, em telas mobile o html2canvas lê a largura colapsada e corta.
-      clone.style.cssText = [
-        'position: absolute',
-        'top: -99999px',
-        'left: -99999px',
-        'width: ' + CAPTURE_WIDTH + 'px',
-        'min-width: ' + CAPTURE_WIDTH + 'px',
-        'max-width: ' + CAPTURE_WIDTH + 'px',
-        'height: auto',
-        'overflow: visible',
-        'background-color: #fdfcf8',
-        'z-index: -9999',
-        'pointer-events: none',
-      ].join('; ');
+    // ── 3. Forçar opacidade total em bandeiras e imagens ─────────────────
+    // html2canvas às vezes subamostra imagens com opacity < 1
+    clone.querySelectorAll('img, .flag-placeholder').forEach(el => {
+      el.style.opacity = '1';
+    });
 
-      // ── 3. Forçar linhas de conexão explícitas e nítidas ─────────────────
-      // Garante que as linhas SVG apareçam no print independente do viewport.
-      clone.querySelectorAll('path[stroke]').forEach(line => {
-        const currentOpacity = parseFloat(line.getAttribute('opacity') || '1');
-        // Aumenta levemente a opacidade das linhas para ficarem visíveis no print
-        line.setAttribute('opacity', Math.min(1, currentOpacity * 1.8).toFixed(2));
-      });
-
-      // ── 4. Watermark do Brasil ───────────────────────────────────────────
-      const watermarkImg = document.createElement('img');
-      watermarkImg.src = 'pngwing.com.png';
-      watermarkImg.alt = 'Brasil';
-      watermarkImg.style.cssText = [
-        'position: absolute',
-        'top: 50%',
-        'left: 50%',
-        'transform: translate(-50%, -50%)',
-        'z-index: 0',
-        'opacity: 0.04',
-        'width: 90%',
-        'max-width: 800px',
-        'height: auto',
-        'object-fit: contain',
-        'pointer-events: none',
-      ].join('; ');
-      clone.appendChild(watermarkImg);
-
-      // ── 5. Injetar clone no DOM e redesenhar linhas SVG ──────────────────
-      document.body.appendChild(clone);
-
-      if (typeof BracketModule !== 'undefined' && BracketModule.drawLines) {
-        BracketModule.drawLines(clone);
+    // ── 4. Reforçar visibilidade das linhas SVG de conexão ───────────────
+    // Aumenta a opacidade das linhas do chaveamento para aparecerem no print
+    clone.querySelectorAll('path[stroke]').forEach(line => {
+      const op = parseFloat(line.getAttribute('opacity') || '1');
+      line.setAttribute('opacity', Math.min(1, op * 2).toFixed(2));
+      // Garante a cor e espessura padrão
+      if (!line.getAttribute('stroke-width') || parseFloat(line.getAttribute('stroke-width')) < 1.5) {
+        line.setAttribute('stroke-width', '1.8');
       }
+    });
 
-      // ── 6. html2canvas com parâmetros anti-corte ─────────────────────────
-      // windowWidth = CAPTURE_WIDTH  → força o media-query a ler como desktop
-      // scrollX/scrollY = 0          → elimina offset de scroll que desloca o canvas
-      // scale = 2                    → dobra a resolução (siglas nítidas)
-      // useCORS = true               → carrega bandeiras do GitHub sem taint
-      const options = {
-        useCORS: true,
-        allowTaint: false,
-        scale: 2,
+    // ── 5. Watermark do Brasil ───────────────────────────────────────────
+    const watermarkImg = document.createElement('img');
+    watermarkImg.src = 'pngwing.com.png';
+    watermarkImg.alt = 'Brasil';
+    Object.assign(watermarkImg.style, {
+      position:      'absolute',
+      top:           '50%',
+      left:          '50%',
+      transform:     'translate(-50%, -50%)',
+      zIndex:        '0',
+      opacity:       '0.04',
+      width:         '90%',
+      maxWidth:      '800px',
+      height:        'auto',
+      objectFit:     'contain',
+      pointerEvents: 'none',
+    });
+    clone.appendChild(watermarkImg);
+
+    // ── 6. Injetar clone no DOM ──────────────────────────────────────────
+    document.body.appendChild(clone);
+
+    // ── 7. Redesenhar linhas SVG no clone com as dimensões corretas ──────
+    if (typeof BracketModule !== 'undefined' && BracketModule.drawLines) {
+      BracketModule.drawLines(clone);
+    }
+
+    // ── 8. Aguardar 200ms para garantir que bandeiras do GitHub carreguem ─
+    setTimeout(() => {
+      // ── 9. html2canvas com parâmetros anti-corte definitivos ──────────
+      // width        → define a largura real capturada do elemento
+      // windowWidth  → força o viewport simulado (desativa media queries mobile)
+      // scrollX/Y    → elimina offset de scroll que desloca o canvas
+      // scale: 2     → 2× resolução para siglas legíveis no WhatsApp
+      html2canvas(clone, {
+        useCORS:         true,
+        allowTaint:      false,
+        scale:           2,
         backgroundColor: '#fdfcf8',
-        windowWidth: CAPTURE_WIDTH,
-        windowHeight: 900,
-        scrollX: 0,
-        scrollY: 0,
-        logging: false,
-      };
+        width:           CAPTURE_WIDTH,
+        windowWidth:     CAPTURE_WIDTH,
+        windowHeight:    900,
+        scrollX:         0,
+        scrollY:         0,
+        logging:         false,
+      }).then((canvas) => {
 
-      html2canvas(clone, options).then((canvas) => {
-        // Remover clone imediatamente após captura
+        // Remover clone imediatamente após geração
         if (document.body.contains(clone)) {
           document.body.removeChild(clone);
         }
@@ -102,34 +115,32 @@ const ShareModule = (() => {
             return;
           }
 
-          const fileName = 'minha-simulacao-copa-2026.png';
-          const file = new File([blob], fileName, { type: 'image/png' });
-          const siteUrl = window.location.origin + window.location.pathname;
+          const fileName  = 'minha-simulacao-copa-2026.png';
+          const file      = new File([blob], fileName, { type: 'image/png' });
+          const siteUrl   = window.location.origin + window.location.pathname;
 
           const shareData = {
             title: 'Minha Simulação da Copa do Mundo 2026',
-            text: '⚽ Olha a minha Simulação da Copa do Mundo 2026 feita pela Ato! Acabei de montar meu chaveamento, monte o seu também!',
-            url: siteUrl,
-            files: [file]
+            text:  '⚽ Olha a minha Simulação da Copa do Mundo 2026 feita pela Ato! Acabei de montar meu chaveamento, monte o seu também!',
+            url:   siteUrl,
+            files: [file],
           };
 
-          // API de compartilhamento nativa (mobile) com suporte a arquivos
+          // API nativa de compartilhamento (iOS/Android)
           if (navigator.canShare && navigator.canShare(shareData) && navigator.share) {
             navigator.share(shareData)
-              .then(() => {
-                showToast("COMPARTILHADO COM SUCESSO!");
-              })
+              .then(() => showToast("COMPARTILHADO COM SUCESSO!"))
               .catch((err) => {
                 if (err.name !== 'AbortError') {
-                  console.warn("Compartilhamento nativo falhou. Fallback ativado.", err);
                   fallbackShare(blob, siteUrl);
                 }
               });
           } else {
-            // Fallback: download + WhatsApp (Desktop / navegadores sem Web Share API)
+            // Fallback: download + WhatsApp (Desktop / browsers sem Web Share API)
             fallbackShare(blob, siteUrl);
           }
         }, 'image/png');
+
       }).catch((err) => {
         if (document.body.contains(clone)) {
           document.body.removeChild(clone);
@@ -138,29 +149,25 @@ const ShareModule = (() => {
         showToast("ERRO AO CAPTURAR TELA");
       });
 
-    }, 150);
+    }, 200); // 200ms de segurança para carregamento de imagens externas
   }
 
   function fallbackShare(blob, siteUrl) {
-    // 1. Download automático da imagem
+    // Download automático da imagem gerada
     const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
+    link.href     = URL.createObjectURL(blob);
     link.download = 'minha-simulacao-copa-2026.png';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
 
-    setTimeout(() => {
-      URL.revokeObjectURL(link.href);
-    }, 150);
+    setTimeout(() => URL.revokeObjectURL(link.href), 150);
 
     showToast("💾 IMAGEM SALVA! REDIRECIONANDO PARA O WHATSAPP...");
 
-    // 2. Abrir WhatsApp com mensagem e link
-    const baseText = "⚽ Olha a minha Simulação da Copa do Mundo 2026 feita pela Ato! Acabei de baixar a imagem do meu chaveamento, monte o seu também! ";
-    const fullText = baseText + siteUrl;
-    const encodedText = encodeURIComponent(fullText);
-    const whatsappUrl = `https://wa.me/?text=${encodedText}`;
+    // Abrir WhatsApp com link do site
+    const baseText    = "⚽ Olha a minha Simulação da Copa do Mundo 2026 feita pela Ato! Acabei de baixar a imagem do meu chaveamento, monte o seu também! ";
+    const whatsappUrl = 'https://wa.me/?text=' + encodeURIComponent(baseText + siteUrl);
 
     setTimeout(() => {
       window.open(whatsappUrl, '_blank', 'noopener,noreferrer');

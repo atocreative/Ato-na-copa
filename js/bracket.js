@@ -427,16 +427,16 @@ const BracketModule = (() => {
 
     center.innerHTML =
       '<div class="bk-center-stack">' +
-        '<div class="bk-trophy-box" style="margin-bottom:1.5rem;">' +
+        '<div class="bk-trophy-box" style="margin-bottom:2rem;">' +
           '<div class="bk-ato-watermark"></div>' +
           '<img src="ta\u00e7a.png" alt="Trof\u00e9u" class="bk-trophy ' + (championTeam ? 'lit' : '') + '">' +
-          '<div class="bk-champion-line" style="margin-top:1.5rem;display:flex;flex-direction:row;justify-content:center;align-items:center;gap:0.5rem;white-space:nowrap;">' + champHTML + '</div>' +
+          '<div class="bk-champion-line" style="margin-top:12px;display:flex;flex-direction:row;justify-content:center;align-items:center;gap:12px;white-space:nowrap;">' + champHTML + '</div>' +
         '</div>' +
         '<div class="bk-final-wrap">' +
           '<div class="bk-round-title">FINAL</div>' +
           matchHTML('final') +
         '</div>' +
-        '<div class="bk-third-wrap" style="margin-top:3rem;">' +
+        '<div class="bk-third-wrap" style="margin-top:4rem;">' +
           '<div class="bk-round-title">DISPUTA 3\u00ba LUGAR</div>' +
           matchHTML('third_place') +
         '</div>' +

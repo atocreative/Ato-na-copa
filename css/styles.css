@@ -273,6 +273,22 @@ button {
   z-index: 1; /* Fundo base */
 }
 
+.native-hero-banner::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url('../assets/copacabana.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0.15;
+  z-index: 2; /* Fica acima do fundo verde, atrás dos outros elementos */
+  pointer-events: none;
+}
+
 /* Side Blocks para isolar o Logotipo e cortar as faixas */
 .side-block {
   position: absolute;
@@ -287,8 +303,16 @@ button {
   left: 0;
 }
 
+.side-block.left .stripe-wrapper {
+  left: 30%; /* Distancia a faixa do centro para a esquerda */
+}
+
 .side-block.right {
   right: 0;
+}
+
+.side-block.right .stripe-wrapper {
+  left: 70%; /* Distancia a faixa do centro para a direita */
 }
 
 .hero-center-logo {

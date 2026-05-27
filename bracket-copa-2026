@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Mata-Mata Copa do Mundo 2026</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+<style>
+*,*::before,*::after{box-sizing:border-box;}
+
+:root{
+  --bg-1:#0a1628;
+  --bg-2:#0f1f3a;
+  --card:#162a4a;
+  --card-hover:#1d3559;
+  --border:rgba(255,255,255,0.08);
+  --line:rgba(120,170,220,0.45);
+  --line-active:#fbbf24;
+  --gold:#fbbf24;
+  --gold-soft:rgba(251,191,36,0.15);
+  --green:#10b981;
+  --text:#e8eef7;
+  --text-dim:#7d92ad;
+  --red:#ef4444;
+
+  --col-w:118px;
+  --gap-x:46px;
+  --match-h:62px;
+}
+
+html,body{height:100%;}
+
+body{
+  margin:0;
+  background:
+    radial-gradient(ellipse at top, #1a2f55 0%, transparent 60%),
+    radial-gradient(ellipse at bottom, #0f1f3a 0%, transparent 60%),
+    linear-gradient(180deg, var(--bg-1), var(--bg-2));
+  color:var(--text);
+  font-family:'Outfit',sans-serif;
+  min-height:100vh;
+  padding:30px 20px 60px;
+  overflow-x:auto;
+}
+
+/* ================== HEADER ================== */
+header{
+  text-align:center;
+  margin-bottom:40px;
+}
+.eyebrow{
+  font-size:11px;
+  letter-spacing:6px;
+  color:var(--gold);
+  font-weight:700;
+  margin-bottom:4px;
+}
+h1{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:54px;
+  letter-spacing:6px;
+  margin:0;
+  background:linear-gradient(180deg, #ffffff 0%, #95b4dc 100%);
+  -webkit-background-clip:text;
+  background-clip:text;
+  -webkit-text-fill-color:transparent;
+  line-height:1;
+}
+.subtitle{
+  font-size:12px;
+  color:var(--text-dim);
+  margin-top:8px;
+  letter-spacing:3px;
+}
+
+/* ================== BRACKET WRAPPER ================== */
+.bracket-wrap{
+  position:relative;
+  width:max-content;
+  margin:0 auto;
+}
+
+/* SVG fica sobreposto */
+.lines-svg{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  pointer-events:none;
+  z-index:1;
+}
+
+.bracket{
+  display:flex;
+  align-items:stretch;
+  gap:var(--gap-x);
+  position:relative;
+  z-index:2;
+  padding-top:54px;       /* mais espaço pros títulos respirarem */
+  min-height:920px;       /* garante espaçamento generoso entre 16 avos */
+}
+
+/* ================== COLUNAS ================== */
+.column{
+  display:flex;
+  flex-direction:column;
+  width:var(--col-w);
+  position:relative;
+}
+
+.column .matches{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-around;
+}
+
+.round-title{
+  position:absolute;
+  top:-34px;             /* sobe pra não colidir com o primeiro card */
+  left:0;
+  right:0;
+  text-align:center;
+  font-family:'Bebas Neue',sans-serif;
+  font-size:14px;
+  letter-spacing:3px;
+  color:var(--text-dim);
+}
+
+/* ================== MATCH ================== */
+.match{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:5px 6px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:4px;
+  min-height:var(--match-h);
+  position:relative;
+  transition:all .2s ease;
+  box-shadow:0 2px 8px rgba(0,0,0,0.25);
+}
+.match:hover{
+  border-color:rgba(120,170,220,0.3);
+}
+
+.team{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:2px;
+  cursor:pointer;
+  padding:2px;
+  border-radius:5px;
+  transition:all .15s ease;
+}
+.team[data-code=""]{
+  cursor:default;
+  opacity:.4;
+}
+.team:not([data-code=""]):hover{
+  background:rgba(255,255,255,0.05);
+  transform:translateY(-1px);
+}
+
+.flag{
+  width:26px;
+  height:18px;
+  object-fit:cover;
+  border-radius:2px;
+  background:#2a3f60;
+  box-shadow:0 1px 2px rgba(0,0,0,0.4);
+  transition:all .2s ease;
+}
+
+.name{
+  font-size:10px;
+  font-weight:700;
+  letter-spacing:0.5px;
+  color:var(--text-dim);
+  transition:color .2s ease;
+}
+
+.vs{
+  font-size:9px;
+  font-weight:800;
+  color:var(--text-dim);
+  opacity:.5;
+}
+
+/* Vencedor */
+.team.winner .name{
+  color:var(--gold);
+}
+.team.winner .flag{
+  box-shadow:0 0 0 2px var(--gold), 0 0 12px rgba(251,191,36,0.5);
+}
+.team.winner{
+  background:var(--gold-soft);
+}
+/* Perdedor */
+.team.loser{
+  opacity:.3;
+  filter:grayscale(80%);
+}
+
+/* Match decidido */
+.match.decided{
+  border-color:rgba(251,191,36,0.25);
+}
+
+/* ================== CENTRO (FINAL) ================== */
+.column.center{
+  width:210px;
+  position:relative;
+  display:flex;
+  align-items:center;       /* centraliza a final verticalmente */
+  justify-content:center;
+}
+.center-stack{
+  position:relative;
+  width:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+}
+
+.trophy-box{
+  position:absolute;
+  bottom:calc(100% + 30px);  /* fica acima da final */
+  left:50%;
+  transform:translateX(-50%);
+  text-align:center;
+  width:200px;
+}
+.trophy{
+  font-size:60px;
+  filter:grayscale(100%) brightness(.6);
+  transition:all .4s ease;
+  display:inline-block;
+}
+.trophy.lit{
+  filter:none;
+  text-shadow:
+    0 0 30px rgba(251,191,36,0.7),
+    0 0 60px rgba(251,191,36,0.4);
+  animation:pulse 2s ease-in-out infinite;
+}
+@keyframes pulse{
+  0%,100%{transform:scale(1);}
+  50%{transform:scale(1.06);}
+}
+.champion-line{
+  margin-top:8px;
+  font-family:'Bebas Neue',sans-serif;
+  letter-spacing:3px;
+  font-size:16px;
+  color:var(--gold);
+  min-height:22px;
+}
+.champion-line .champ-flag{
+  width:34px;
+  height:24px;
+  vertical-align:middle;
+  border-radius:3px;
+  margin-right:6px;
+  box-shadow:0 0 0 2px var(--gold);
+}
+
+/* Final */
+.final-wrap{
+  width:100%;
+  position:relative;
+  padding-top:18px;
+}
+.final-wrap .round-title{
+  color:var(--gold);
+  font-size:16px;
+  letter-spacing:4px;
+  top:-30px;
+}
+.final-wrap .match{
+  background:linear-gradient(180deg, #1d3559 0%, #162a4a 100%);
+  border:1.5px solid var(--gold);
+  box-shadow:
+    0 0 0 4px rgba(251,191,36,0.08),
+    0 10px 30px rgba(0,0,0,0.5);
+  min-height:92px;          /* bem mais alta */
+  padding:10px 8px;
+}
+.final-wrap .team{
+  padding:4px;
+}
+.final-wrap .flag{
+  width:40px;
+  height:28px;
+}
+.final-wrap .name{
+  font-size:12px;
+}
+.final-wrap .vs{
+  font-size:11px;
+}
+
+/* 3º lugar */
+.third-wrap{
+  position:absolute;
+  top:calc(100% + 30px);     /* fica abaixo da final */
+  left:50%;
+  transform:translateX(-50%);
+  width:100%;
+  padding-top:18px;
+}
+.third-wrap .round-title{
+  color:var(--text-dim);
+  font-size:11px;
+  top:-22px;
+}
+.third-wrap .match{
+  background:rgba(22,42,74,0.5);
+  border-style:dashed;
+}
+
+/* ================== RESPONSIVE NOTICE ================== */
+.scroll-hint{
+  text-align:center;
+  color:var(--text-dim);
+  font-size:11px;
+  margin-top:30px;
+  letter-spacing:2px;
+}
+
+/* ================== LEGEND ================== */
+.legend{
+  display:flex;
+  gap:24px;
+  justify-content:center;
+  margin-top:30px;
+  font-size:11px;
+  color:var(--text-dim);
+  letter-spacing:1px;
+}
+.legend-item{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.legend-dot{
+  width:10px;
+  height:10px;
+  border-radius:50%;
+}
+.legend-dot.gold{background:var(--gold);}
+.legend-dot.dim{background:var(--text-dim);opacity:.4;}
+
+/* Reset button */
+.reset-btn{
+  display:block;
+  margin:30px auto 0;
+  padding:10px 28px;
+  background:transparent;
+  border:1px solid var(--border);
+  color:var(--text-dim);
+  font-family:'Outfit',sans-serif;
+  font-size:11px;
+  letter-spacing:3px;
+  text-transform:uppercase;
+  cursor:pointer;
+  border-radius:4px;
+  transition:all .2s ease;
+}
+.reset-btn:hover{
+  border-color:var(--gold);
+  color:var(--gold);
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">FIFA WORLD CUP</div>
+  <h1>2026 · MATA-MATA</h1>
+  <div class="subtitle">CLIQUE NO TIME PARA AVANÇAR</div>
+</header>
+
+<div class="bracket-wrap" id="bracket-wrap">
+  <svg class="lines-svg" id="lines-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+  <div class="bracket" id="bracket"></div>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><span class="legend-dot gold"></span>VENCEDOR</div>
+  <div class="legend-item"><span class="legend-dot dim"></span>ELIMINADO</div>
+</div>
+
+<button class="reset-btn" onclick="resetBracket()">RESETAR CHAVEAMENTO</button>
+
+<script>
+/* ============================================================
+   DADOS
+============================================================ */
+const flagMap = {
+  QAT:'qa', ECU:'ec', SEN:'sn', NED:'nl',
+  ENG:'gb-eng', IRN:'ir', USA:'us', WAL:'gb-wls',
+  ARG:'ar', KSA:'sa', MEX:'mx', POL:'pl',
+  FRA:'fr', AUS:'au', DEN:'dk', TUN:'tn',
+  ESP:'es', CRC:'cr', GER:'de', JPN:'jp',
+  BEL:'be', CAN:'ca', MAR:'ma', CRO:'hr',
+  BRA:'br', SRB:'rs', SUI:'ch', CMR:'cm',
+  POR:'pt', GHA:'gh', URU:'uy', KOR:'kr'
+};
+
+const leftTeams = [
+  "QAT","ECU","SEN","NED",
+  "ENG","IRN","USA","WAL",
+  "ARG","KSA","MEX","POL",
+  "FRA","AUS","DEN","TUN"
+];
+
+const rightTeams = [
+  "ESP","CRC","GER","JPN",
+  "BEL","CAN","MAR","CRO",
+  "BRA","SRB","SUI","CMR",
+  "POR","GHA","URU","KOR"
+];
+
+const TITLES = {
+  1:'16 AVOS',
+  2:'OITAVAS',
+  3:'QUARTAS',
+  4:'SEMIFINAL'
+};
+
+let bracketData = {};
+
+/* ============================================================
+   CONSTRUÇÃO DOS DADOS
+============================================================ */
+function buildData(){
+  bracketData = {};
+
+  function side(prefix, teams){
+    let count = 8;
+    for(let round=1; round<=4; round++){
+      for(let i=1; i<=count; i++){
+        const id = `${prefix}_${round}_${i}`;
+        const nextId = round<4
+          ? `${prefix}_${round+1}_${Math.ceil(i/2)}`
+          : 'final';
+        const nextSlot = i%2===1 ? 't1' : 't2';
+        bracketData[id] = {
+          id,
+          t1: round===1 ? teams[(i-1)*2] : null,
+          t2: round===1 ? teams[(i-1)*2+1] : null,
+          winner:null,
+          nextId,
+          nextSlot
+        };
+      }
+      count /= 2;
+    }
+  }
+
+  side('l', leftTeams);
+  side('r', rightTeams);
+
+  // No bracket final, o lado direito ocupa o slot t2
+  // Vamos ajustar para que r_4_1 mande seu vencedor para t2 da final
+  bracketData['r_4_1'].nextSlot = 't2';
+  bracketData['l_4_1'].nextSlot = 't1';
+
+  bracketData['final'] = {
+    id:'final', t1:null, t2:null, winner:null
+  };
+  bracketData['third'] = {
+    id:'third', t1:null, t2:null, winner:null
+  };
+}
+
+/* ============================================================
+   SELEÇÃO DE VENCEDOR
+============================================================ */
+function selectWinner(matchId, slot){
+  const m = bracketData[matchId];
+  if(!m || !m[slot]) return;
+
+  const newWinner = m[slot];
+  const loser = slot==='t1' ? m.t2 : m.t1;
+  const prevWinner = m.winner;
+
+  // Se já tinha um vencedor diferente, limpar cascata para frente
+  if(prevWinner && prevWinner !== newWinner){
+    clearForward(m);
+  }
+
+  m.winner = newWinner;
+
+  // Propaga vencedor
+  if(m.nextId){
+    const next = bracketData[m.nextId];
+    next[m.nextSlot] = newWinner;
+  }
+
+  // Disputa de 3º lugar - alimentada pelos perdedores das semis
+  if(matchId === 'l_4_1'){
+    bracketData['third'].t1 = loser;
+    // Se o 3º já tinha sido decidido, resetar
+    if(bracketData['third'].winner){
+      bracketData['third'].winner = null;
+    }
+  }
+  if(matchId === 'r_4_1'){
+    bracketData['third'].t2 = loser;
+    if(bracketData['third'].winner){
+      bracketData['third'].winner = null;
+    }
+  }
+
+  render();
+}
+
+function clearForward(match){
+  if(!match.nextId) return;
+  const next = bracketData[match.nextId];
+  if(!next) return;
+
+  // Limpa o slot daquele vencedor anterior se ainda estiver lá
+  if(next[match.nextSlot] === match.winner){
+    next[match.nextSlot] = null;
+  }
+  // Se o vencedor anterior estava propagado adiante, cascateia
+  if(next.winner === match.winner){
+    const oldWinner = next.winner;
+    next.winner = null;
+    clearForward(next);
+  }
+
+  // Caso especial: limpar 3º lugar se alterou semifinal
+  if(match.id === 'l_4_1'){
+    bracketData['third'].t1 = null;
+    bracketData['third'].winner = null;
+  }
+  if(match.id === 'r_4_1'){
+    bracketData['third'].t2 = null;
+    bracketData['third'].winner = null;
+  }
+}
+
+function resetBracket(){
+  buildData();
+  render();
+}
+
+/* ============================================================
+   RENDER
+============================================================ */
+function teamHTML(code, isWinner, isLoser, matchId, slot){
+  if(!code){
+    return `
+      <div class="team" data-code="">
+        <div class="flag" style="background:#2a3f60"></div>
+        <span class="name">—</span>
+      </div>`;
+  }
+  const cls = `team${isWinner?' winner':''}${isLoser?' loser':''}`;
+  const flag = flagMap[code];
+  return `
+    <div class="${cls}" data-code="${code}"
+         onclick="selectWinner('${matchId}','${slot}')">
+      <img class="flag" src="https://flagcdn.com/w40/${flag}.png" alt="${code}">
+      <span class="name">${code}</span>
+    </div>`;
+}
+
+function matchHTML(m){
+  const decided = m.winner ? 'decided' : '';
+  const wT1 = m.winner && m.winner===m.t1;
+  const wT2 = m.winner && m.winner===m.t2;
+  const lT1 = m.winner && m.t1 && !wT1;
+  const lT2 = m.winner && m.t2 && !wT2;
+  return `
+    <div class="match ${decided}" data-match-id="${m.id}">
+      ${teamHTML(m.t1, wT1, lT1, m.id, 't1')}
+      <div class="vs">VS</div>
+      ${teamHTML(m.t2, wT2, lT2, m.id, 't2')}
+    </div>`;
+}
+
+function render(){
+  const bracket = document.getElementById('bracket');
+  bracket.innerHTML = '';
+
+  // ===== LADO ESQUERDO: rounds 1 → 4 =====
+  for(let r=1; r<=4; r++){
+    const col = document.createElement('div');
+    col.className = 'column left-col';
+    col.dataset.round = r;
+    col.dataset.side = 'l';
+
+    col.innerHTML = `
+      <div class="round-title">${TITLES[r]}</div>
+      <div class="matches"></div>
+    `;
+
+    const matches = col.querySelector('.matches');
+    Object.values(bracketData)
+      .filter(m => m.id.startsWith(`l_${r}_`))
+      .forEach(m => {
+        matches.insertAdjacentHTML('beforeend', matchHTML(m));
+      });
+
+    bracket.appendChild(col);
+  }
+
+  // ===== CENTRO =====
+  const center = document.createElement('div');
+  center.className = 'column center';
+
+  const fm = bracketData['final'];
+  const tm = bracketData['third'];
+
+  let champHTML = '';
+  if(fm.winner){
+    const flag = flagMap[fm.winner];
+    champHTML = `
+      <img class="champ-flag" src="https://flagcdn.com/w80/${flag}.png">
+      ${fm.winner} CAMPEÃO
+    `;
+  } else {
+    champHTML = '&nbsp;';
+  }
+
+  center.innerHTML = `
+    <div class="center-stack">
+
+      <div class="trophy-box">
+        <div class="trophy ${fm.winner?'lit':''}">🏆</div>
+        <div class="champion-line">${champHTML}</div>
+      </div>
+
+      <div class="final-wrap">
+        <div class="round-title">FINAL</div>
+        ${matchHTML(fm)}
+      </div>
+
+      <div class="third-wrap">
+        <div class="round-title">DISPUTA 3º LUGAR</div>
+        ${matchHTML(tm)}
+      </div>
+
+    </div>
+  `;
+  bracket.appendChild(center);
+
+  // ===== LADO DIREITO: rounds 4 → 1 =====
+  for(let r=4; r>=1; r--){
+    const col = document.createElement('div');
+    col.className = 'column right-col';
+    col.dataset.round = r;
+    col.dataset.side = 'r';
+
+    col.innerHTML = `
+      <div class="round-title">${TITLES[r]}</div>
+      <div class="matches"></div>
+    `;
+
+    const matches = col.querySelector('.matches');
+    Object.values(bracketData)
+      .filter(m => m.id.startsWith(`r_${r}_`))
+      .forEach(m => {
+        matches.insertAdjacentHTML('beforeend', matchHTML(m));
+      });
+
+    bracket.appendChild(col);
+  }
+
+  // Desenhar linhas após o DOM estar pronto
+  requestAnimationFrame(drawLines);
+}
+
+/* ============================================================
+   DESENHO DAS LINHAS (SVG)
+============================================================ */
+function drawLines(){
+  const wrap = document.getElementById('bracket-wrap');
+  const svg = document.getElementById('lines-svg');
+  const bracket = document.getElementById('bracket');
+
+  const wrapRect = wrap.getBoundingClientRect();
+  const W = wrap.scrollWidth;
+  const H = wrap.scrollHeight;
+
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.setAttribute('width', W);
+  svg.setAttribute('height', H);
+  svg.innerHTML = '';
+
+  function getMatchRect(matchId){
+    const el = bracket.querySelector(`[data-match-id="${matchId}"]`);
+    if(!el) return null;
+    const r = el.getBoundingClientRect();
+    return {
+      left:   r.left   - wrapRect.left,
+      right:  r.right  - wrapRect.left,
+      top:    r.top    - wrapRect.top,
+      bottom: r.bottom - wrapRect.top,
+      cy:     r.top + r.height/2 - wrapRect.top,
+      cx:     r.left + r.width/2 - wrapRect.left
+    };
+  }
+
+  function drawLine(d, options={}){
+    const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('d', d);
+    path.setAttribute('fill','none');
+    path.setAttribute('stroke', options.active ? '#fbbf24' : '#5a7ba8');
+    path.setAttribute('stroke-width', options.active ? '2.5' : '1.6');
+    path.setAttribute('stroke-linecap','round');
+    path.setAttribute('stroke-linejoin','round');
+    path.setAttribute('opacity', options.active ? '0.95' : '0.55');
+    svg.appendChild(path);
+  }
+
+  // LADO ESQUERDO: conectar pares (1+2, 3+4, ...) das rodadas 1..3 com a próxima rodada
+  for(let r=1; r<=3; r++){
+    const count = 8 / Math.pow(2, r-1); // 8, 4, 2
+    for(let i=1; i<=count; i+=2){
+      const a = getMatchRect(`l_${r}_${i}`);
+      const b = getMatchRect(`l_${r}_${i+1}`);
+      const next = getMatchRect(`l_${r+1}_${Math.ceil(i/2)}`);
+      if(!a || !b || !next) continue;
+
+      const mA = bracketData[`l_${r}_${i}`];
+      const mB = bracketData[`l_${r}_${i+1}`];
+      const mN = bracketData[`l_${r+1}_${Math.ceil(i/2)}`];
+
+      const midX = (a.right + next.left)/2;
+      const startX = a.right;
+
+      // Linha do match A (em cima): sai para a direita, desce até nível do next
+      const activeA = !!mA.winner;
+      drawLine(
+        `M ${startX} ${a.cy} L ${midX} ${a.cy} L ${midX} ${next.cy}`,
+        {active: activeA}
+      );
+      // Linha do match B (embaixo): sai para a direita, sobe até nível do next
+      const activeB = !!mB.winner;
+      drawLine(
+        `M ${b.right} ${b.cy} L ${midX} ${b.cy} L ${midX} ${next.cy}`,
+        {active: activeB}
+      );
+      // Linha horizontal do midX até o next
+      const activeNext = !!(mA.winner || mB.winner);
+      drawLine(
+        `M ${midX} ${next.cy} L ${next.left} ${next.cy}`,
+        {active: activeNext}
+      );
+    }
+  }
+
+  // LADO DIREITO: mesma coisa, mas espelhado
+  for(let r=1; r<=3; r++){
+    const count = 8 / Math.pow(2, r-1);
+    for(let i=1; i<=count; i+=2){
+      const a = getMatchRect(`r_${r}_${i}`);
+      const b = getMatchRect(`r_${r}_${i+1}`);
+      const next = getMatchRect(`r_${r+1}_${Math.ceil(i/2)}`);
+      if(!a || !b || !next) continue;
+
+      const mA = bracketData[`r_${r}_${i}`];
+      const mB = bracketData[`r_${r}_${i+1}`];
+
+      const midX = (a.left + next.right)/2;
+
+      const activeA = !!mA.winner;
+      drawLine(
+        `M ${a.left} ${a.cy} L ${midX} ${a.cy} L ${midX} ${next.cy}`,
+        {active: activeA}
+      );
+      const activeB = !!mB.winner;
+      drawLine(
+        `M ${b.left} ${b.cy} L ${midX} ${b.cy} L ${midX} ${next.cy}`,
+        {active: activeB}
+      );
+      const activeNext = !!(mA.winner || mB.winner);
+      drawLine(
+        `M ${midX} ${next.cy} L ${next.right} ${next.cy}`,
+        {active: activeNext}
+      );
+    }
+  }
+
+  // SEMIFINAIS → FINAL
+  const semiL = getMatchRect('l_4_1');
+  const semiR = getMatchRect('r_4_1');
+  const finalR = getMatchRect('final');
+  const mSemiL = bracketData['l_4_1'];
+  const mSemiR = bracketData['r_4_1'];
+
+  if(semiL && finalR){
+    const active = !!mSemiL.winner;
+    drawLine(
+      `M ${semiL.right} ${semiL.cy} L ${finalR.left} ${semiL.cy} L ${finalR.left} ${finalR.cy - 2}`,
+      {active}
+    );
+    // Trecho final entrando na final
+    drawLine(
+      `M ${finalR.left} ${finalR.cy} L ${finalR.left + 2} ${finalR.cy}`,
+      {active}
+    );
+  }
+  if(semiR && finalR){
+    const active = !!mSemiR.winner;
+    drawLine(
+      `M ${semiR.left} ${semiR.cy} L ${finalR.right} ${semiR.cy} L ${finalR.right} ${finalR.cy - 2}`,
+      {active}
+    );
+    drawLine(
+      `M ${finalR.right} ${finalR.cy} L ${finalR.right - 2} ${finalR.cy}`,
+      {active}
+    );
+  }
+
+  // SEMIFINAIS → 3º LUGAR (linha tracejada sutil)
+  const thirdR = getMatchRect('third');
+  if(semiL && thirdR){
+    const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('d',
+      `M ${semiL.right} ${semiL.bottom - 4} L ${semiL.right + 14} ${semiL.bottom - 4} L ${semiL.right + 14} ${thirdR.cy} L ${thirdR.left} ${thirdR.cy}`
+    );
+    path.setAttribute('fill','none');
+    path.setAttribute('stroke','#5a7ba8');
+    path.setAttribute('stroke-width','1.2');
+    path.setAttribute('stroke-dasharray','3,4');
+    path.setAttribute('opacity','0.35');
+    svg.appendChild(path);
+  }
+  if(semiR && thirdR){
+    const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('d',
+      `M ${semiR.left} ${semiR.bottom - 4} L ${semiR.left - 14} ${semiR.bottom - 4} L ${semiR.left - 14} ${thirdR.cy} L ${thirdR.right} ${thirdR.cy}`
+    );
+    path.setAttribute('fill','none');
+    path.setAttribute('stroke','#5a7ba8');
+    path.setAttribute('stroke-width','1.2');
+    path.setAttribute('stroke-dasharray','3,4');
+    path.setAttribute('opacity','0.35');
+    svg.appendChild(path);
+  }
+}
+
+/* ============================================================
+   INIT
+============================================================ */
+buildData();
+render();
+
+window.addEventListener('resize', () => {
+  requestAnimationFrame(drawLines);
+});
+
+// Redesenha quando as fontes carregam (evita layout shift que bagunça as linhas)
+if(document.fonts && document.fonts.ready){
+  document.fonts.ready.then(() => requestAnimationFrame(drawLines));
+}
+</script>
+
+</body>
+</html>

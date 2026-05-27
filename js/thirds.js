@@ -76,7 +76,7 @@ const ThirdsModule = (() => {
 
       const flagUrl = getFlagUrl(third);
       const flagHtml = flagUrl
-        ? `<div class="flag-placeholder"><img src="${flagUrl}" alt="${third.name}" loading="lazy"/></div>`
+        ? `<img src="${flagUrl}" alt="${third.name}" width="32" height="24" class="flag-placeholder" loading="lazy"/>`
         : `<div class="flag-placeholder"></div>`;
 
       return `

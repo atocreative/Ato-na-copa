@@ -82,9 +82,9 @@ function showConfirmModal(title, message) {
       BracketModule.fillRandomly();
       showToast('SIMULAÇÃO COMPLETA');
       
-      const knockoutSection = document.getElementById('knockout-section');
-      if (knockoutSection) {
-        knockoutSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const bracketWrap = document.getElementById('bracket-wrap');
+      if (bracketWrap) {
+        bracketWrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     }, 300);
   });
@@ -109,40 +109,6 @@ function showConfirmModal(title, message) {
     ShareModule.share();
   });
 
-  document.getElementById('knockout-nav').addEventListener('click', (e) => {
-    const btn = e.target.closest('.phase-nav-btn');
-    if (!btn) return;
-
-    const phase = btn.dataset.phase;
-    const nav = document.getElementById('knockout-nav');
-    nav.querySelectorAll('.phase-nav-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-
-    const container = document.getElementById('bracket-container');
-    const phases = container.querySelectorAll('.bracket-phase');
-
-    if (phase === 'all') {
-      phases.forEach(p => p.style.display = '');
-      container.querySelector('.champion-column').style.display = '';
-      return;
-    }
-
-    const phaseMap = {
-      'r32': 'r32',
-      'r16': 'r16',
-      'qf': 'qf',
-      'sf': 'sf',
-      'f': 'final',
-    };
-
-    phases.forEach(p => p.style.display = '');
-    container.querySelector('.champion-column').style.display = '';
-
-    const target = container.querySelector(`[data-phase="${phaseMap[phase] || phase}"]`);
-    if (target) {
-      target.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-    }
-  });
 
   function saveState() {
     try {

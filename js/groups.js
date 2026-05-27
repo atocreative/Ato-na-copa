@@ -106,9 +106,9 @@ const GroupsModule = (() => {
           <span class="team-name">${team.name}</span>
         </div>
         <div class="team-positions">
-          <button class="pos-btn" data-pos="1" data-team="${team.id}" data-group="${group}" title="1º" aria-label="${team.name} 1º"></button>
-          <button class="pos-btn" data-pos="2" data-team="${team.id}" data-group="${group}" title="2º" aria-label="${team.name} 2º"></button>
-          <button class="pos-btn" data-pos="3" data-team="${team.id}" data-group="${group}" title="3º" aria-label="${team.name} 3º"></button>
+          <button class="pos-btn" data-pos="1" data-team="${team.id}" data-group="${group}" title="1º" aria-label="Colocar ${team.name} em 1º lugar"></button>
+          <button class="pos-btn" data-pos="2" data-team="${team.id}" data-group="${group}" title="2º" aria-label="Colocar ${team.name} em 2º lugar"></button>
+          <button class="pos-btn" data-pos="3" data-team="${team.id}" data-group="${group}" title="3º" aria-label="Colocar ${team.name} em 3º lugar"></button>
         </div>
       </div>
     `;
@@ -117,7 +117,7 @@ const GroupsModule = (() => {
   function getFlagHtml(team) {
     const url = getFlagUrl(team);
     if (url) {
-      return `<div class="flag-placeholder"><img src="${url}" alt="${team.name}" loading="lazy"/></div>`;
+      return `<img src="${url}" alt="${team.name}" width="32" height="24" class="flag-placeholder" loading="lazy"/>`;
     }
     return `<div class="flag-placeholder"></div>`;
   }

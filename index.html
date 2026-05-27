@@ -1,7 +1,16 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 
 <head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-346TQ1HL9P"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-346TQ1HL9P');
+  </script>
+
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta name="theme-color" content="#fdfcf8" />
@@ -24,38 +33,29 @@
   <meta property="og:image:height" content="300" />
   <meta property="og:type" content="website" />
 
-  <link rel="stylesheet" href="css/styles.css" />
+  <!-- Conexão Prévia de Fontes (Lighthouse Render-blocking mitigation) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Archivo:ital,wght@0,900;1,900&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="css/styles.min.css" />
 </head>
 
 <body>
 
-  <!-- ═══════ BANNER 1: HERO (NATIVO) ═══════ -->
+  <!-- ═══════ BANNER 1: HERO (NATIVO ESTÁTICO) ═══════ -->
   <section class="native-hero-banner">
     
     <!-- BLOCO LATERAL ESQUERDO (Isolamento) -->
     <div class="side-block left">
       <div class="stripe-wrapper wrapper-desc">
         <div class="hero-stripe stripe-yellow">
-          <div class="marquee-wrapper">
-            <div class="marquee-content">
-              FAÇA SEU PALPITE ★ FAÇA SEU PALPITE ★ FAÇA SEU PALPITE ★ FAÇA SEU PALPITE ★ FAÇA SEU PALPITE ★
-            </div>
-            <div class="marquee-content" aria-hidden="true">
-              FAÇA SEU PALPITE ★ FAÇA SEU PALPITE ★ FAÇA SEU PALPITE ★ FAÇA SEU PALPITE ★ FAÇA SEU PALPITE ★
-            </div>
-          </div>
+          FAÇA SEU PALPITE ★ FAÇA SEU PALPITE ★ FAÇA SEU PALPITE
         </div>
       </div>
       <div class="stripe-wrapper wrapper-asc">
         <div class="hero-stripe stripe-blue">
-          <div class="marquee-wrapper" style="animation-direction: reverse;">
-            <div class="marquee-content">
-              É HEXA ★ É HEXA ★ É HEXA ★ É HEXA ★ É HEXA ★ É HEXA ★ É HEXA ★ É HEXA ★ 
-            </div>
-            <div class="marquee-content" aria-hidden="true">
-              É HEXA ★ É HEXA ★ É HEXA ★ É HEXA ★ É HEXA ★ É HEXA ★ É HEXA ★ É HEXA ★ É HEXA ★ É HEXA ★ É HEXA ★ É HEXA ★ É HEXA ★ É HEXA ★ É HEXA ★ É HEXA ★ É HEXA ★
-            </div>
-          </div>
+          É HEXA ★ É HEXA ★ É HEXA ★ É HEXA ★ É HEXA
         </div>
       </div>
     </div>
@@ -64,32 +64,18 @@
     <div class="side-block right">
       <div class="stripe-wrapper wrapper-desc">
         <div class="hero-stripe stripe-blue">
-          <div class="marquee-wrapper" style="animation-direction: reverse;">
-            <div class="marquee-content">
-              É HEXA ★ É HEXA ★ É HEXA ★ É HEXA ★ É HEXA ★ É HEXA ★ É HEXA ★ É HEXA ★
-            </div>
-            <div class="marquee-content" aria-hidden="true">
-              É HEXA ★ É HEXA ★ É HEXA ★ É HEXA ★ É HEXA ★ É HEXA ★ É HEXA ★ É HEXA ★ É HEXA ★ É HEXA ★ É HEXA ★ É HEXA ★ É HEXA ★ É HEXA ★ É HEXA ★ É HEXA ★ É HEXA ★
-            </div>
-          </div>
+          É HEXA ★ É HEXA ★ É HEXA ★ É HEXA ★ É HEXA
         </div>
       </div>
       <div class="stripe-wrapper wrapper-asc">
         <div class="hero-stripe stripe-yellow">
-          <div class="marquee-wrapper">
-            <div class="marquee-content">
-              FAÇA SEU PALPITE ★ FAÇA SEU PALPITE ★ FAÇA SEU PALPITE ★ FAÇA SEU PALPITE ★ FAÇA SEU PALPITE ★
-            </div>
-            <div class="marquee-content" aria-hidden="true">
-              FAÇA SEU PALPITE ★ FAÇA SEU PALPITE ★ FAÇA SEU PALPITE ★ FAÇA SEU PALPITE ★ FAÇA SEU PALPITE ★
-            </div>
-          </div>
+          FAÇA SEU PALPITE ★ FAÇA SEU PALPITE ★ FAÇA SEU PALPITE
         </div>
       </div>
     </div>
 
     <div class="hero-center-logo">
-      <img src="image2vector.svg" alt="Faça seu palpite" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'450\' height=\'80\'><text x=\'50%\' y=\'50%\' dominant-baseline=\'middle\' text-anchor=\'middle\' font-family=\'Arial\' font-size=\'40\' fill=\'white\' font-weight=\'bold\'>FAÇA SEU PALPITE</text></svg>'"/>
+      <img src="image2vector.svg" alt="Logotipo Faça Seu Palpite" width="450" height="80" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'450\' height=\'80\'><text x=\'50%\' y=\'50%\' dominant-baseline=\'middle\' text-anchor=\'middle\' font-family=\'Arial\' font-size=\'40\' fill=\'white\' font-weight=\'bold\'>FAÇA SEU PALPITE</text></svg>'"/>
     </div>
   </section>
 
@@ -151,22 +137,10 @@
       </div>
     </div>
 
-    <!-- ═══════ KNOCKOUT BRACKET ═══════ -->
-    <section class="knockout-section container" id="knockout-section">
-      <h2 class="section-title">Mata-Mata</h2>
-
-      <nav class="knockout-phases-nav" id="knockout-nav">
-        <button class="phase-nav-btn active" data-phase="all">TODOS</button>
-        <button class="phase-nav-btn" data-phase="r32">16-AVOS</button>
-        <button class="phase-nav-btn" data-phase="r16">OITAVAS</button>
-        <button class="phase-nav-btn" data-phase="qf">QUARTAS</button>
-        <button class="phase-nav-btn" data-phase="sf">SEMIFINAL</button>
-        <button class="phase-nav-btn" data-phase="f">FINAL</button>
-      </nav>
-
-      <!-- Generated by JS -->
-    </section>
-    <div class="bracket-container" id="bracket-container">
+    <!-- ═══════ MATA-MATA (BRACKET-COPA-2026 REFERENCE) ═══════ -->
+    <div class="bracket-wrap" id="bracket-wrap">
+      <svg class="lines-svg" id="lines-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+      <div id="bracket"></div>
     </div>
 
   </div> <!-- End Watermark Wrapper -->
@@ -174,20 +148,23 @@
   <!-- ═══════ BANNER 3: CTA / BOTTOM (NATIVO GRID) ═══════ -->
   <div id="banner3-grid" class="banner3-container"></div>
 
-  <!-- ═══════ CTA ÁLBUM DA COPA ═══════ -->
+  <!-- ═══════ CTA UNIFICADO (FIGURINHAS + CAMISAS) ═══════ -->
   <section class="album-cta">
+    <!-- Imagens Decorativas de Fundo Absoluto -->
+    <img src="assets/album.png" alt="Álbum da Copa 2026" class="cta-bg-img cta-bg-album" width="250" height="295" />
+    <img src="assets/figurinhas.png" alt="Figurinhas da Copa" class="cta-bg-img cta-bg-stickers" width="250" height="295" />
+    <img src="assets/camisa1.png" alt="Camisa 1 da Copa" class="cta-bg-img cta-bg-shirt1" width="250" height="295" />
+    <img src="assets/camisa2.png" alt="Camisa 2 da Copa" class="cta-bg-img cta-bg-shirt2" width="250" height="295" />
+
     <div class="cta-inner container">
       <div class="cta-content">
-        <h2>ESTÁ COLECIONANDO O ÁLBUM DA COPA 2026?</h2>
-        <p>Oferta exclusiva para você de Brasília. Compre figurinhas oficiais com desconto e em um lugar 100% confiável.</p>
-        <a href="https://wa.me/556191995064?text=Ol%C3%A1%21+Vim+do+Simulador+da+Copa+e+quero+garantir+meu+desconto+nas+figurinhas+de+Bras%C3%ADlia%21" target="_blank" rel="noopener noreferrer" class="cta-whatsapp-btn">
+        <h2>VAI COLECIONAR OU VESTIR O MANTO DA COPA?</h2>
+                <p>Oferta exclusiva para quem é de Brasília! Garanta ATÉ 20% DE DESCONTO a depender do produto e da quantidade na compra de figurinhas oficiais da Copa, álbuns ou camisas de futebol de seleções e clubes. Qualquer compra utilizando o simulador garante o seu desconto com total confiança.</p>
+                <a href="https://wa.me/556191995064?text=Ol%C3%A1%21+Vim+pelo+Simulador+da+Copa+da+Ato+e+quero+garantir+meu+desconto+de+at%C3%A9+20%25+em+produtos+da+Copa+e+camisas+de+futebol%21" target="_blank" rel="noopener noreferrer" class="cta-whatsapp-btn" aria-label="Falar no WhatsApp para garantir desconto no Álbum e Camisas da Copa">
+
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
           GARANTIR MEU DESCONTO NO WHATSAPP
         </a>
-      </div>
-      <div class="cta-images">
-        <img src="assets/album.png" alt="Álbum da Copa 2026" class="cta-img-album" />
-        <img src="assets/figurinhas.png" alt="Figurinhas da Copa" class="cta-img-stickers" />
       </div>
     </div>
   </section>
@@ -195,22 +172,22 @@
   <!-- ═══════ FOOTER ═══════ -->
   <footer class="site-footer">
     <span class="footer-text">Desenvolvido por</span>
-    <a href="https://siteato.vercel.app/" target="_blank" rel="noopener noreferrer" class="ato-logo-link">
-      <img src="ato-compacto-branca.svg" alt="Ato" class="ato-logo" />
+    <a href="https://siteato.vercel.app/" target="_blank" rel="noopener noreferrer" class="ato-logo-link" aria-label="Ir para o site oficial da ATO.">
+      <img src="ato-compacto-branca.svg" alt="Ato" class="ato-logo" width="91" height="32" />
     </a>
   </footer>
 
   <!-- ═══════ ACTION BAR ═══════ -->
   <div class="action-bar" id="action-bar">
-    <button class="action-btn primary" id="btn-fill-all" title="PREENCHER TUDO">
+    <button class="action-btn primary" id="btn-fill-all" title="PREENCHER TUDO" aria-label="Preencher automaticamente todos os palpites com escolhas aleatórias">
       <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
       PREENCHER TUDO
     </button>
-    <button class="action-btn" id="btn-reset" title="REINICIAR">
+    <button class="action-btn" id="btn-reset" title="REINICIAR" aria-label="Reiniciar toda a simulação dos grupos e chaveamento">
       <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6"></path><path d="M3 12a9 9 0 0 1 15-6.7L21 8"></path><path d="M3 22v-6h6"></path><path d="M21 12a9 9 0 0 1-15 6.7L3 16"></path></svg>
       REINICIAR
     </button>
-    <button class="action-btn" id="btn-share" title="COMPARTILHAR">
+    <button class="action-btn" id="btn-share" title="COMPARTILHAR" aria-label="Gerar imagem de alta resolução do chaveamento e compartilhar">
       <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>
       COMPARTILHAR
     </button>
@@ -233,13 +210,7 @@
 
   <!-- ═══════ SCRIPTS ═══════ -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <script src="js/data.js"></script>
-  <script src="js/groups.js"></script>
-  <script src="js/thirds.js"></script>
-  <script src="js/bracket.js"></script>
-  <script src="js/share.js"></script>
-  <script src="js/app.js"></script>
-  <script src="js/banner3.js"></script>
+  <script src="js/app.min.js"></script>
 
 </body>
 

@@ -188,16 +188,18 @@ const ShareModule = (() => {
     // ── 3. Marcas d'água (ATO no topo e Brasil no fundo) ────────
     const atoLogo = printClone.querySelector(".bk-ato-watermark");
     if (atoLogo) {
-      // Coloca a logo da ATO no topo da coluna central
-      const centerCol = printClone.querySelector('.bk-center');
-      if (centerCol) centerCol.prepend(atoLogo);
-      
+      // Posiciona a logo da ATO absolutamente no topo do print
       Object.assign(atoLogo.style, {
-        position: "relative",
-        margin: "0 auto 40px auto", // Aumenta o respiro pra não encostar na taça
-        opacity: "0.5", // Deixa a marca d'agua mais destacada
+        position: "absolute",
+        top: "40px", // Grudado no topo com um pequeno respiro
+        left: "50%",
+        transform: "translateX(-50%)",
+        width: "160px", // Um pouco maior
+        height: "160px",
+        opacity: "0.5",
         zIndex: "10"
       });
+      printClone.appendChild(atoLogo);
     }
     
     const watermarkImg = document.createElement('img');

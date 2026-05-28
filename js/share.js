@@ -129,7 +129,7 @@ const ShareModule = (() => {
           flexDirection: "column",
           alignItems: "center",
           bottom: "auto", left: "auto", transform: "none",
-          margin: "-60px 0 20px 0" // Move a taça e o texto pra cima
+          margin: "-90px 0 30px 0" // Move a taça e o texto mais pra cima ainda
         });
       }
 
@@ -194,8 +194,8 @@ const ShareModule = (() => {
       
       Object.assign(atoLogo.style, {
         position: "relative",
-        margin: "0 auto 30px auto",
-        opacity: "0.25",
+        margin: "0 auto 40px auto", // Aumenta o respiro pra não encostar na taça
+        opacity: "0.5", // Deixa a marca d'agua mais destacada
         zIndex: "10"
       });
     }

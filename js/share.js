@@ -129,14 +129,14 @@ const ShareModule = (() => {
           flexDirection: "column",
           alignItems: "center",
           bottom: "auto", left: "auto", transform: "none",
-          margin: "0 0 20px 0"
+          margin: "-60px 0 20px 0" // Move a taça e o texto pra cima
         });
       }
 
       if (taçaImg) {
         // Reduz o tamanho da taça conforme solicitado
-        taçaImg.style.width = "90px";
-        taçaImg.style.marginBottom = "12px";
+        taçaImg.style.width = "75px";
+        taçaImg.style.marginBottom = "8px";
       }
 
       if (championLine) {
@@ -185,9 +185,20 @@ const ShareModule = (() => {
       }
     }
 
-    // ── 3. Watermark do Brasil cobrindo o print todo com opacity 0.3 ────────
-    const oldWatermark = printClone.querySelector(".bk-ato-watermark");
-    if (oldWatermark) oldWatermark.remove(); // Limpa se existir versão antiga
+    // ── 3. Marcas d'água (ATO no topo e Brasil no fundo) ────────
+    const atoLogo = printClone.querySelector(".bk-ato-watermark");
+    if (atoLogo) {
+      // Coloca a logo da ATO no topo da coluna central
+      const centerCol = printClone.querySelector('.bk-center');
+      if (centerCol) centerCol.prepend(atoLogo);
+      
+      Object.assign(atoLogo.style, {
+        position: "relative",
+        margin: "0 auto 30px auto",
+        opacity: "0.25",
+        zIndex: "10"
+      });
+    }
     
     const watermarkImg = document.createElement('img');
     watermarkImg.src = 'pngwing.com.png';
@@ -198,9 +209,9 @@ const ShareModule = (() => {
       left: "50%", 
       transform: "translate(-50%, -50%)",
       zIndex: "0", 
-      opacity: "0.3", // Conforme solicitado
+      opacity: "0.1", // Conforme solicitado
       width: "auto",
-      height: "100%", // Cobre a altura toda
+      height: "80%", // Um pouco menor que antes
       objectFit: "contain", 
       pointerEvents: "none"
     });

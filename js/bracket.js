@@ -221,6 +221,18 @@ const BracketModule = (() => {
     const match = matches[matchId];
     if (!match) return;
 
+    if (matchId === 'final') {
+      const thirdMatch = matches['third_place'];
+      if (!thirdMatch || !thirdMatch.winner) {
+        if (typeof showToast === 'function') {
+          showToast("POR FAVOR, DEFINA O TERCEIRO LUGAR PRIMEIRO!", 3500);
+        } else {
+          alert("Por favor, defina o terceiro lugar primeiro!");
+        }
+        return;
+      }
+    }
+
     const t1Id = match.team1 ? match.team1.id : null;
     const t2Id = match.team2 ? match.team2.id : null;
     if (teamId !== t1Id && teamId !== t2Id) return;

@@ -153,8 +153,8 @@ const ShareModule = (() => {
       if (finalWrap) {
         Object.assign(finalWrap.style, {
           position: "relative",
-          width: "240px",
-          margin: "20px 0",
+          width: "210px", // Original site width (matches .bk-center width)
+          margin: "20px auto", // Centered within the 350px container
           top: "auto", left: "auto", transform: "none"
         });
         
@@ -170,8 +170,8 @@ const ShareModule = (() => {
       if (thirdWrap) {
         Object.assign(thirdWrap.style, {
           position: "relative",
-          width: "240px",
-          margin: "30px 0 0 0",
+          width: "210px", // Original site width
+          margin: "30px auto 0 auto", // Centered
           top: "auto", left: "auto", transform: "none"
         });
 

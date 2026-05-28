@@ -1566,24 +1566,7 @@ button {
   display: block !important;
 }
 
-.bracket-wrap.capture-mode .bk-trophy-box {
-  position: absolute !important;
-  bottom: calc(100% + 30px) !important;
-  left: 50% !important;
-  transform: translateX(-50%) !important;
-}
-
-.bracket-wrap.capture-mode .bk-third-wrap {
-  position: absolute !important;
-  top: calc(100% + 80px) !important;
-  left: 50% !important;
-  transform: translateX(-50%) !important;
-}
-
-.bracket-wrap.capture-mode .bk-round-title {
-  position: absolute !important;
-  top: -34px !important;
-}
+/* Overrides removidos para permitir o fluxo flex no centro */
 
 /* Watermark for print only */
 .bracket-watermark {

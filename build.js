@@ -10,19 +10,16 @@ function minifyCSS(css) {
     .trim();
 }
 
-// 2. Safe JS Minifier (Preserves ASI and URLs)
+// 2. Safe JS Minifier — only removes block comments and compresses whitespace
+//    Does NOT strip line comments (//) because our naive regex approach
+//    destroys regex literals like /^https?:\/\// in the source code.
 function minifyJS(js) {
-  // Remove block comments
+  // Remove block comments only (safe — never inside regex literals)
   let cleaned = js.replace(/\/\*[\s\S]*?\*\//g, '');
   
-  // Split into lines to safely remove line comments and preserve newlines (ASI protection)
+  // Split into lines, trim each, remove empty
   let lines = cleaned.split(/\r?\n/);
-  
-  let processedLines = lines.map(line => {
-    // Remove line comments safely (only if not preceded by http: or https: to protect URLs)
-    let noComment = line.replace(/(?<!http:|https:)\/\/.*/g, '');
-    return noComment.trim();
-  }).filter(line => line.length > 0); // remove empty lines
+  let processedLines = lines.map(line => line.trim()).filter(line => line.length > 0);
   
   return processedLines.join('\n');
 }

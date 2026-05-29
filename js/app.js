@@ -64,7 +64,10 @@ function showConfirmModal(title, message) {
     saveState();
   });
 
-  BracketModule.onChange(() => saveState());
+  BracketModule.onChange(() => {
+    saveState();
+    ShareModule.preGenerate();
+  });
 
   document.getElementById('btn-fill-all').addEventListener('click', async () => {
     // Para evitar preenchimento acidental se já houver dados
@@ -81,6 +84,7 @@ function showConfirmModal(title, message) {
     setTimeout(() => {
       BracketModule.fillRandomly();
       showToast('SIMULAÇÃO COMPLETA');
+      ShareModule.preGenerate();
       
       const bracketWrap = document.getElementById('bracket-wrap');
       if (bracketWrap) {
@@ -151,6 +155,7 @@ function showConfirmModal(title, message) {
       document.getElementById('thirds-section').style.display = '';
 
       showToast('SIMULAÇÃO RESTAURADA');
+      ShareModule.preGenerate();
     } catch (e) {
       console.warn('Failed to load saved state:', e);
     }

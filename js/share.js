@@ -1,19 +1,26 @@
 /**
- * Share Module — Print Engine (Flexbox Simétrico + Miolo Flow + Base64)
- * Mantém o chaveamento limpo usando flexbox do HTML original, corrigindo
- * linhas tortas, alinhando cards ao centro e preservando bandeiras.
+ * Share Module — Pré-geração em background + Share Sheet nativo
+ *
+ * Problema: navigator.share() exige "gesto do usuário" ativo.
+ * Após Promises longas (html2canvas + fetch), o browser anula o contexto
+ * de gesto e o Share Sheet não abre — principalmente no iOS Safari.
+ *
+ * Solução: gerar a imagem em background sempre que o chaveamento muda,
+ * e na hora do clique a imagem já está pronta → share é chamado
+ * imediatamente, dentro do gesto.
  */
 const ShareModule = (() => {
 
-  const CAPTURE_WIDTH = 1650;
+  const CAPTURE_WIDTH  = 1650;
   const CAPTURE_HEIGHT = 1050;
 
-  // ── PIPELINE DE BANDEIRAS ──────────────────────────────────────────────────
-  // Tentativas em ordem:
-  // 1) fetch direto com CORS
-  // 2) allorigins.win (proxy confiável para SVGs de CDN)
-  // 3) corsproxy.io como fallback
-  // Se tudo falhar, a bandeira fica cinza (aceitável)
+  // Cache da última imagem gerada
+  let _cachedBlob = null;
+  let _cachedFile = null;
+  let _generating  = false;
+  let _genDebounce = null;
+
+  // ── CORS / Base64 Pipeline ─────────────────────────────────────────────────
   const CORS_PROXIES = [
     "https://api.allorigins.win/raw?url=",
     "https://corsproxy.io/?",
@@ -21,54 +28,37 @@ const ShareModule = (() => {
 
   const blobToDataUrl = (blob) => new Promise((resolve) => {
     const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
+    reader.onload  = () => resolve(reader.result);
     reader.onerror = () => resolve(null);
     reader.readAsDataURL(blob);
   });
 
   const fetchAsDataUrl = async (src) => {
-    // Tentativa 1: fetch direto com CORS
     try {
       const r = await fetch(src, { mode: "cors", credentials: "omit", cache: "force-cache" });
-      if (r.ok) {
-        const blob = await r.blob();
-        const url = await blobToDataUrl(blob);
-        if (url) return url;
-      }
-    } catch (e) { /* continua */ }
+      if (r.ok) { const u = await blobToDataUrl(await r.blob()); if (u) return u; }
+    } catch (e) {}
 
-    // Tentativas 2+: proxies CORS
     for (const proxy of CORS_PROXIES) {
       try {
         const r = await fetch(proxy + encodeURIComponent(src), { credentials: "omit" });
-        if (r.ok) {
-          const blob = await r.blob();
-          const url = await blobToDataUrl(blob);
-          if (url) return url;
-        }
-      } catch (e) { /* continua */ }
+        if (r.ok) { const u = await blobToDataUrl(await r.blob()); if (u) return u; }
+      } catch (e) {}
     }
-
     return null;
   };
 
-  // Converte data URL de SVG para PNG via canvas.
-  // html2canvas tem suporte limitado a SVG — PNG é mais confiável.
+  // SVG → PNG: html2canvas tem suporte limitado a SVG
   const svgDataUrlToPng = (dataUrl) => new Promise((resolve) => {
     if (!dataUrl || !dataUrl.startsWith("data:image/svg")) return resolve(dataUrl);
     const img = new Image();
     img.onload = () => {
-      const w = Math.max(img.naturalWidth || img.width, 40);
+      const w = Math.max(img.naturalWidth  || img.width,  40);
       const h = Math.max(img.naturalHeight || img.height, 30);
       const c = document.createElement("canvas");
-      c.width = w;
-      c.height = h;
-      try {
-        c.getContext("2d").drawImage(img, 0, 0, w, h);
-        resolve(c.toDataURL("image/png"));
-      } catch (e) {
-        resolve(dataUrl); // fallback: mantém SVG
-      }
+      c.width = w; c.height = h;
+      try { c.getContext("2d").drawImage(img, 0, 0, w, h); resolve(c.toDataURL("image/png")); }
+      catch (e) { resolve(dataUrl); }
     };
     img.onerror = () => resolve(dataUrl);
     img.src = dataUrl;
@@ -76,277 +66,202 @@ const ShareModule = (() => {
 
   const waitForImgDecode = (img) => new Promise((resolve) => {
     if (img.complete && img.naturalWidth > 0) return resolve();
-    const done = () => { img.onload = null; img.onerror = null; resolve(); };
-    img.onload = done;
-    img.onerror = done;
+    const done = () => { img.onload = img.onerror = null; resolve(); };
+    img.onload = img.onerror = done;
     setTimeout(done, 2000);
   });
 
   const convertImagesToBase64 = async (cloneNode) => {
-    const images = cloneNode.querySelectorAll("img");
-    const promises = Array.from(images).map(async (img) => {
+    const imgs = Array.from(cloneNode.querySelectorAll("img"));
+    await Promise.all(imgs.map(async (img) => {
       const src = img.src;
       if (!src || src.startsWith("data:") || src.startsWith("blob:")) return;
-
       let dataUrl = await fetchAsDataUrl(src);
-
-      if (dataUrl) {
-        // Converte SVG → PNG para compatibilidade com html2canvas
-        dataUrl = await svgDataUrlToPng(dataUrl);
-      }
-
-      if (dataUrl) {
-        img.src = dataUrl;
-        await waitForImgDecode(img);
-      }
-    });
-    await Promise.all(promises);
+      if (dataUrl) dataUrl = await svgDataUrlToPng(dataUrl);
+      if (dataUrl) { img.src = dataUrl; await waitForImgDecode(img); }
+    }));
   };
 
-  function share() {
+  // ── Monta clone e captura PNG ──────────────────────────────────────────────
+  function buildClone() {
     const original = document.getElementById('bracket-wrap');
-    if (!original) {
-      showToast("ERRO: ÁRVORE MATA-MATA NÃO ENCONTRADA");
-      return;
-    }
+    if (!original) return null;
 
-    showToast("📸 GERANDO IMAGEM DA SUA SIMULAÇÃO...", 3000);
+    const clone = original.cloneNode(true);
+    clone.classList.add('capture-mode');
 
-    const printClone = original.cloneNode(true);
-    printClone.classList.add('capture-mode');
-
-    // ── 1. Estilização Flexbox Simétrica para o Clone Principal ─────────────
-    Object.assign(printClone.style, {
-      position: "absolute",
-      top: "-9999px",
-      left: "-9999px",
-      width: CAPTURE_WIDTH + "px",
-      minWidth: CAPTURE_WIDTH + "px",
+    Object.assign(clone.style, {
+      position: "absolute", top: "-9999px", left: "-9999px",
+      width: CAPTURE_WIDTH + "px", minWidth: CAPTURE_WIDTH + "px",
       height: CAPTURE_HEIGHT + "px",
       padding: "40px 60px",
       backgroundColor: "#fdfcf8",
-      transform: "none",
-      zoom: "1",
-      boxSizing: "border-box"
+      transform: "none", zoom: "1", boxSizing: "border-box"
     });
 
-    const bracketInner = printClone.querySelector('#bracket');
+    const bracketInner = clone.querySelector('#bracket');
     if (bracketInner) {
       Object.assign(bracketInner.style, {
-        display: "flex",
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "stretch",
-        width: "100%",
-        height: "100%",
-        position: "relative"
+        display: "flex", flexDirection: "row",
+        justifyContent: "space-between", alignItems: "stretch",
+        width: "100%", height: "100%", position: "relative"
       });
       Array.from(bracketInner.children).forEach(col => {
         if (col.classList.contains('bk-column')) {
-          col.style.position = "relative";
-          col.style.top = "auto";
-          col.style.left = "auto";
-          col.style.right = "auto";
-          col.style.bottom = "auto";
+          col.style.cssText += ";position:relative;top:auto;left:auto;right:auto;bottom:auto";
         }
       });
     }
 
-    // ── 2. ISOLAMENTO E CENTRALIZAÇÃO DO MIOLO CENTRAL ───────────────────────
-    const centerCol = printClone.querySelector('.bk-center');
+    const centerCol = clone.querySelector('.bk-center');
     if (centerCol) {
       Object.assign(centerCol.style, {
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        width: "350px",
-        position: "relative",
-        zIndex: "50"
+        display: "flex", flexDirection: "column",
+        alignItems: "center", justifyContent: "center",
+        width: "350px", position: "relative", zIndex: "50"
+      });
+      const stack = centerCol.querySelector('.bk-center-stack');
+      if (stack) Object.assign(stack.style, {
+        display: "flex", flexDirection: "column",
+        alignItems: "center", justifyContent: "center",
+        width: "100%", position: "static"
       });
 
-      const stack = centerCol.querySelector('.bk-center-stack');
-      if (stack) {
-        Object.assign(stack.style, {
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          width: "100%",
-          position: "static"
-        });
-      }
-
-      const trophyBox = centerCol.querySelector(".bk-trophy-box");
-      const taçaImg = centerCol.querySelector(".bk-trophy");
+      const trophyBox    = centerCol.querySelector(".bk-trophy-box");
+      const taçaImg      = centerCol.querySelector(".bk-trophy");
       const championLine = centerCol.querySelector(".bk-champion-line");
-      const finalWrap = centerCol.querySelector(".bk-final-wrap");
-      const thirdWrap = centerCol.querySelector(".bk-third-wrap");
+      const finalWrap    = centerCol.querySelector(".bk-final-wrap");
+      const thirdWrap    = centerCol.querySelector(".bk-third-wrap");
 
-      if (trophyBox) {
-        Object.assign(trophyBox.style, {
-          position: "relative",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          bottom: "auto", left: "auto", transform: "none",
-          margin: "-90px 0 30px 0"
-        });
-      }
-
-      if (taçaImg) {
-        taçaImg.style.width = "75px";
-        taçaImg.style.marginBottom = "8px";
-      }
-
-      if (championLine) {
-        Object.assign(championLine.style, {
-          display: "flex",
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: "10px",
-          marginTop: "0"
-        });
-      }
-
+      if (trophyBox) Object.assign(trophyBox.style, {
+        position: "relative", display: "flex", flexDirection: "column",
+        alignItems: "center", bottom: "auto", left: "auto",
+        transform: "none", margin: "-90px 0 30px 0"
+      });
+      if (taçaImg)      { taçaImg.style.width = "75px"; taçaImg.style.marginBottom = "8px"; }
+      if (championLine) Object.assign(championLine.style, {
+        display: "flex", flexDirection: "row",
+        alignItems: "center", justifyContent: "center",
+        gap: "10px", marginTop: "0"
+      });
       if (finalWrap) {
         Object.assign(finalWrap.style, {
-          position: "relative",
-          width: "210px",
-          margin: "20px auto",
-          top: "auto", left: "auto", transform: "none"
+          position: "relative", width: "210px",
+          margin: "20px auto", top: "auto", left: "auto", transform: "none"
         });
-        const finalTitle = finalWrap.querySelector(".bk-round-title");
-        if (finalTitle) {
-          finalTitle.style.position = "relative";
-          finalTitle.style.top = "auto";
-          finalTitle.style.marginBottom = "8px";
-        }
+        const t = finalWrap.querySelector(".bk-round-title");
+        if (t) { t.style.position = "relative"; t.style.top = "auto"; t.style.marginBottom = "8px"; }
       }
-
       if (thirdWrap) {
         Object.assign(thirdWrap.style, {
-          position: "relative",
-          width: "210px",
-          margin: "30px auto 0 auto",
-          top: "auto", left: "auto", transform: "none"
+          position: "relative", width: "210px",
+          margin: "30px auto 0 auto", top: "auto", left: "auto", transform: "none"
         });
-        const thirdTitle = thirdWrap.querySelector(".bk-round-title");
-        if (thirdTitle) {
-          thirdTitle.style.position = "relative";
-          thirdTitle.style.top = "auto";
-          thirdTitle.style.marginBottom = "8px";
-        }
+        const t = thirdWrap.querySelector(".bk-round-title");
+        if (t) { t.style.position = "relative"; t.style.top = "auto"; t.style.marginBottom = "8px"; }
       }
     }
 
-    // ── 3. Marcas d'água ────────────────────────────────────────────────────
-    const atoLogo = printClone.querySelector(".bk-ato-watermark");
+    // Marca d'água ATO
+    const atoLogo = clone.querySelector(".bk-ato-watermark");
     if (atoLogo) {
       Object.assign(atoLogo.style, {
-        position: "absolute",
-        top: "40px",
-        left: "50%",
-        transform: "translateX(-50%)",
-        width: "160px",
-        height: "160px",
-        opacity: "0.5",
-        zIndex: "10"
+        position: "absolute", top: "40px", left: "50%",
+        transform: "translateX(-50%)", width: "160px", height: "160px",
+        opacity: "0.5", zIndex: "10"
       });
-      printClone.appendChild(atoLogo);
+      clone.appendChild(atoLogo);
     }
 
-    const watermarkImg = document.createElement('img');
-    watermarkImg.src = 'pngwing.com.png';
-    watermarkImg.className = "print-watermark";
-    Object.assign(watermarkImg.style, {
-      position: "absolute",
-      top: "50%",
-      left: "50%",
+    // Marca d'água Brasil
+    const wm = document.createElement('img');
+    wm.src = 'pngwing.com.png';
+    Object.assign(wm.style, {
+      position: "absolute", top: "50%", left: "50%",
       transform: "translate(-50%, -50%)",
-      zIndex: "0",
-      opacity: "0.1",
-      width: "auto",
-      height: "80%",
-      objectFit: "contain",
-      pointerEvents: "none"
+      zIndex: "0", opacity: "0.1", width: "auto", height: "80%",
+      objectFit: "contain", pointerEvents: "none"
     });
-    printClone.appendChild(watermarkImg);
+    clone.appendChild(wm);
 
-    // Força opacidade das bandeiras
-    printClone.querySelectorAll("img.bk-flag, img.bk-champ-flag, .flag-placeholder").forEach(el => {
+    clone.querySelectorAll("img.bk-flag, img.bk-champ-flag").forEach(el => {
       el.style.opacity = "1";
     });
 
-    document.body.appendChild(printClone);
-
-    // ── 4. Converte imagens → Base64 (SVG convertido para PNG) ───────────────
-    // Depois desenha as linhas dentro de rAF para garantir layout computado
-    convertImagesToBase64(printClone).then(() => {
-      requestAnimationFrame(() => {
-        // Desenha linhas APÓS o layout estar computado pelo browser
-        if (typeof BracketModule !== 'undefined' && BracketModule.drawLines) {
-          BracketModule.drawLines(printClone);
-
-          printClone.querySelectorAll('path[stroke]').forEach(line => {
-            line.style.opacity = '1';
-            line.setAttribute('opacity', '1');
-            if (parseFloat(line.getAttribute('stroke-width') || '0') < 1.8) {
-              line.setAttribute('stroke-width', '1.8');
-            }
-          });
-        }
-
-        // Captura após as linhas estarem desenhadas
-        setTimeout(() => {
-          html2canvas(printClone, {
-            useCORS: true,
-            allowTaint: false,
-            scale: 2,
-            backgroundColor: "#fdfcf8",
-            width: CAPTURE_WIDTH,
-            height: CAPTURE_HEIGHT,
-            windowWidth: CAPTURE_WIDTH,
-            windowHeight: CAPTURE_HEIGHT,
-            scrollX: 0,
-            scrollY: 0,
-            imageTimeout: 30000,
-            logging: false
-          }).then(canvas => {
-            if (document.body.contains(printClone)) document.body.removeChild(printClone);
-
-            canvas.toBlob((blob) => {
-              if (!blob) { showToast("ERRO AO GERAR IMAGEM"); return; }
-
-              const siteUrl = window.location.origin + window.location.pathname;
-              const file = new File([blob], 'minha-simulacao-copa-2026.png', { type: 'image/png' });
-              doShare(blob, file, siteUrl);
-            }, 'image/png');
-          }).catch(err => {
-            if (document.body.contains(printClone)) document.body.removeChild(printClone);
-            console.error("Erro no html2canvas:", err);
-            showToast("ERRO AO CAPTURAR TELA");
-          });
-        }, 400);
-      });
-    });
+    return clone;
   }
 
-  // Cascata de compartilhamento:
-  // 1) Web Share API com arquivo (abre folha nativa do SO com imagem)
-  // 2) Web Share API só com texto+URL (abre folha nativa sem imagem)
-  // 3) Último recurso: baixa imagem + abre WhatsApp Web (desktop sem suporte)
-  async function doShare(blob, file, siteUrl) {
+  async function captureClone(clone) {
+    document.body.appendChild(clone);
+    try {
+      await convertImagesToBase64(clone);
+
+      await new Promise(res => requestAnimationFrame(res));
+
+      // Redesenha linhas SVG após layout assentar
+      if (typeof BracketModule !== 'undefined' && BracketModule.drawLines) {
+        BracketModule.drawLines(clone);
+        clone.querySelectorAll('path[stroke]').forEach(line => {
+          line.style.opacity = '1';
+          line.setAttribute('opacity', '1');
+          if (parseFloat(line.getAttribute('stroke-width') || '0') < 1.8)
+            line.setAttribute('stroke-width', '1.8');
+        });
+      }
+
+      await new Promise(res => setTimeout(res, 300));
+
+      const canvas = await html2canvas(clone, {
+        useCORS: true, allowTaint: false, scale: 2,
+        backgroundColor: "#fdfcf8",
+        width: CAPTURE_WIDTH, height: CAPTURE_HEIGHT,
+        windowWidth: CAPTURE_WIDTH, windowHeight: CAPTURE_HEIGHT,
+        scrollX: 0, scrollY: 0,
+        imageTimeout: 30000, logging: false
+      });
+
+      return await new Promise(res => canvas.toBlob(res, 'image/png'));
+    } finally {
+      if (document.body.contains(clone)) document.body.removeChild(clone);
+    }
+  }
+
+  // ── Pré-geração em background ──────────────────────────────────────────────
+  // Chamado sempre que o chaveamento muda. Debounced para não gerar
+  // a cada clique em sequência rápida.
+  function preGenerate() {
+    clearTimeout(_genDebounce);
+    _genDebounce = setTimeout(() => {
+      if (_generating) return;
+      _generating = true;
+      _cachedBlob = null;
+      _cachedFile = null;
+
+      const clone = buildClone();
+      if (!clone) { _generating = false; return; }
+
+      captureClone(clone).then(blob => {
+        _generating = false;
+        if (blob) {
+          _cachedBlob = blob;
+          _cachedFile = new File([blob], 'minha-simulacao-copa-2026.png', { type: 'image/png' });
+        }
+      }).catch(() => { _generating = false; });
+    }, 1200); // espera 1.2s após última mudança para não gerar desnecessariamente
+  }
+
+  // ── Share em cascata ───────────────────────────────────────────────────────
+  // Nível 1: Web Share API com arquivo  → abre Share Sheet nativo com imagem
+  // Nível 2: Web Share API sem arquivo  → abre Share Sheet nativo sem imagem
+  // Nível 3: download + WhatsApp Web    → desktop sem suporte
+  async function doShare(blob, file) {
+    const siteUrl   = window.location.origin + window.location.pathname;
     const shareText = '⚽ Olha a minha Simulação da Copa do Mundo 2026 feita pela Ato! Acabei de montar meu chaveamento, monte o seu também!';
 
-    // Nível 1: share com arquivo
     if (navigator.share && navigator.canShare) {
       const dataWithFile = {
         title: 'Minha Simulação da Copa do Mundo 2026',
-        text: shareText,
-        url: siteUrl,
-        files: [file]
+        text: shareText, url: siteUrl, files: [file]
       };
       if (navigator.canShare(dataWithFile)) {
         try {
@@ -354,18 +269,16 @@ const ShareModule = (() => {
           showToast("COMPARTILHADO COM SUCESSO!");
           return;
         } catch (err) {
-          if (err.name === 'AbortError') return;
+          if (err.name === 'AbortError') return; // usuário cancelou
         }
       }
     }
 
-    // Nível 2: share só com texto + URL (sem arquivo)
     if (navigator.share) {
       try {
         await navigator.share({
           title: 'Minha Simulação da Copa do Mundo 2026',
-          text: shareText,
-          url: siteUrl
+          text: shareText, url: siteUrl
         });
         showToast("COMPARTILHADO COM SUCESSO!");
         return;
@@ -374,9 +287,9 @@ const ShareModule = (() => {
       }
     }
 
-    // Nível 3: baixa imagem + abre WhatsApp Web (desktop)
+    // Desktop: baixa + WhatsApp Web
     const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
+    link.href     = URL.createObjectURL(blob);
     link.download = 'minha-simulacao-copa-2026.png';
     document.body.appendChild(link);
     link.click();
@@ -384,8 +297,48 @@ const ShareModule = (() => {
     setTimeout(() => URL.revokeObjectURL(link.href), 150);
 
     showToast("💾 IMAGEM SALVA! REDIRECIONANDO PARA O WHATSAPP...");
-    setTimeout(() => window.open('https://wa.me/?text=' + encodeURIComponent(shareText + ' ' + siteUrl), '_blank', 'noopener,noreferrer'), 1500);
+    setTimeout(() => window.open(
+      'https://wa.me/?text=' + encodeURIComponent(shareText + ' ' + siteUrl),
+      '_blank', 'noopener,noreferrer'
+    ), 1500);
   }
 
-  return { share };
+  // ── Ponto de entrada público ───────────────────────────────────────────────
+  function share() {
+    if (_cachedBlob && _cachedFile) {
+      // Imagem já pronta → share imediato dentro do gesto do usuário
+      doShare(_cachedBlob, _cachedFile);
+      return;
+    }
+
+    if (_generating) {
+      // Ainda gerando → avisa e pede para tentar de novo em instantes
+      showToast("⏳ PREPARANDO IMAGEM... TENTE NOVAMENTE EM INSTANTES", 3000);
+      return;
+    }
+
+    // Não há cache nem geração em andamento (primeiro uso):
+    // gera agora, e como provavelmente vai perder o contexto de gesto
+    // no iOS, avisa o usuário para clicar de novo.
+    showToast("📸 PREPARANDO IMAGEM... TOQUE EM COMPARTILHAR NOVAMENTE", 4000);
+    _generating = true;
+    const clone = buildClone();
+    if (!clone) { _generating = false; showToast("ERRO AO GERAR IMAGEM"); return; }
+
+    captureClone(clone).then(blob => {
+      _generating = false;
+      if (blob) {
+        _cachedBlob = blob;
+        _cachedFile = new File([blob], 'minha-simulacao-copa-2026.png', { type: 'image/png' });
+        showToast("✅ IMAGEM PRONTA! TOQUE EM COMPARTILHAR.", 3500);
+      } else {
+        showToast("ERRO AO GERAR IMAGEM");
+      }
+    }).catch(() => {
+      _generating = false;
+      showToast("ERRO AO CAPTURAR TELA");
+    });
+  }
+
+  return { share, preGenerate };
 })();

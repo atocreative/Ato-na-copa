@@ -321,21 +321,7 @@ const ShareModule = (() => {
 
               const siteUrl = window.location.origin + window.location.pathname;
               const file = new File([blob], 'minha-simulacao-copa-2026.png', { type: 'image/png' });
-
-              const shareData = {
-                title: 'Minha Simulação da Copa do Mundo 2026',
-                text: '⚽ Olha a minha Simulação da Copa do Mundo 2026 feita pela Ato! Acabei de montar meu chaveamento, monte o seu também!',
-                url: siteUrl,
-                files: [file]
-              };
-
-              if (navigator.canShare && navigator.canShare(shareData) && navigator.share) {
-                navigator.share(shareData)
-                  .then(() => showToast("COMPARTILHADO COM SUCESSO!"))
-                  .catch(err => { if (err.name !== 'AbortError') fallbackShare(blob, siteUrl); });
-              } else {
-                fallbackShare(blob, siteUrl);
-              }
+              doShare(blob, file, siteUrl);
             }, 'image/png');
           }).catch(err => {
             if (document.body.contains(printClone)) document.body.removeChild(printClone);
@@ -347,7 +333,48 @@ const ShareModule = (() => {
     });
   }
 
-  function fallbackShare(blob, siteUrl) {
+  // Cascata de compartilhamento:
+  // 1) Web Share API com arquivo (abre folha nativa do SO com imagem)
+  // 2) Web Share API só com texto+URL (abre folha nativa sem imagem)
+  // 3) Último recurso: baixa imagem + abre WhatsApp Web (desktop sem suporte)
+  async function doShare(blob, file, siteUrl) {
+    const shareText = '⚽ Olha a minha Simulação da Copa do Mundo 2026 feita pela Ato! Acabei de montar meu chaveamento, monte o seu também!';
+
+    // Nível 1: share com arquivo
+    if (navigator.share && navigator.canShare) {
+      const dataWithFile = {
+        title: 'Minha Simulação da Copa do Mundo 2026',
+        text: shareText,
+        url: siteUrl,
+        files: [file]
+      };
+      if (navigator.canShare(dataWithFile)) {
+        try {
+          await navigator.share(dataWithFile);
+          showToast("COMPARTILHADO COM SUCESSO!");
+          return;
+        } catch (err) {
+          if (err.name === 'AbortError') return;
+        }
+      }
+    }
+
+    // Nível 2: share só com texto + URL (sem arquivo)
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Minha Simulação da Copa do Mundo 2026',
+          text: shareText,
+          url: siteUrl
+        });
+        showToast("COMPARTILHADO COM SUCESSO!");
+        return;
+      } catch (err) {
+        if (err.name === 'AbortError') return;
+      }
+    }
+
+    // Nível 3: baixa imagem + abre WhatsApp Web (desktop)
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
     link.download = 'minha-simulacao-copa-2026.png';
@@ -357,9 +384,7 @@ const ShareModule = (() => {
     setTimeout(() => URL.revokeObjectURL(link.href), 150);
 
     showToast("💾 IMAGEM SALVA! REDIRECIONANDO PARA O WHATSAPP...");
-
-    const baseText = "⚽ Olha a minha Simulação da Copa do Mundo 2026 feita pela Ato! Acabei de baixar a imagem do meu chaveamento, monte o seu também! ";
-    setTimeout(() => window.open('https://wa.me/?text=' + encodeURIComponent(baseText + siteUrl), '_blank', 'noopener,noreferrer'), 1500);
+    setTimeout(() => window.open('https://wa.me/?text=' + encodeURIComponent(shareText + ' ' + siteUrl), '_blank', 'noopener,noreferrer'), 1500);
   }
 
   return { share };

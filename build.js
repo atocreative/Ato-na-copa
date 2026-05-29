@@ -27,6 +27,18 @@ function minifyJS(js) {
   return processedLines.join('\n');
 }
 
+// 3. Anti-clone wrapper — IIFE + debugger trap
+function wrapAntiClone(js) {
+  const buildId = Date.now().toString(36);
+  return '(function(){' +
+    'var _b="' + buildId + '";' +
+    'setInterval(function(){' +
+      'try{(function(){}).constructor("debugger")()}catch(e){}' +
+    '},3000);' +
+    '\n' + js + '\n' +
+  '})();';
+}
+
 const rootDir = __dirname;
 
 // Read and minify CSS
@@ -36,7 +48,7 @@ if (fs.existsSync(cssPath)) {
   const css = fs.readFileSync(cssPath, 'utf8');
   const minCss = minifyCSS(css);
   fs.writeFileSync(minCssPath, minCss, 'utf8');
-  console.log(`CSS minificado com sucesso! De: ${css.length} bytes -> Para: ${minCss.length} bytes`);
+  console.log('CSS minificado com sucesso! De: ' + css.length + ' bytes -> Para: ' + minCss.length + ' bytes');
 }
 
 // Combine and minify JS files
@@ -56,11 +68,12 @@ jsFiles.forEach(file => {
   if (fs.existsSync(filePath)) {
     combinedJS += fs.readFileSync(filePath, 'utf8') + '\n';
   } else {
-    console.error(`Aviso: Arquivo não encontrado: ${file}`);
+    console.error('Aviso: Arquivo nao encontrado: ' + file);
   }
 });
 
 const minJsPath = path.join(rootDir, 'js', 'app.min.js');
 const minJS = minifyJS(combinedJS);
-fs.writeFileSync(minJsPath, minJS, 'utf8');
-console.log(`JS minificado com sucesso! De: ${combinedJS.length} bytes -> Para: ${minJS.length} bytes`);
+const protectedJS = wrapAntiClone(minJS);
+fs.writeFileSync(minJsPath, protectedJS, 'utf8');
+console.log('JS minificado e protegido! De: ' + combinedJS.length + ' bytes -> Para: ' + protectedJS.length + ' bytes');

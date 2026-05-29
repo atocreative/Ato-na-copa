@@ -8,33 +8,81 @@ const ShareModule = (() => {
   const CAPTURE_WIDTH = 1650;
   const CAPTURE_HEIGHT = 1050;
 
-  // ── FUNÇÃO BASE64 (MANTÉM AS BANDEIRAS VISÍVEIS) ─────────────────────────
+  // ── PIPELINE DE BANDEIRAS (3 TENTATIVAS) ─────────────────────────────────
+  // Mobile (especialmente iOS Safari) tem problemas com crossOrigin+canvas:
+  // 1) fetch direto com CORS — funciona se o CDN serve Access-Control-Allow-Origin
+  // 2) fetch via proxy CORS — fallback pra CDNs sem CORS
+  // 3) canvas+crossOrigin — fallback final (pode falhar com SecurityError)
+  const CORS_PROXY = "https://corsproxy.io/?";
+
+  const blobToDataUrl = (blob) => new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => resolve(null);
+    reader.readAsDataURL(blob);
+  });
+
+  const fetchAsDataUrl = async (src) => {
+    // Tentativa 1: fetch direto com CORS
+    try {
+      const r = await fetch(src, { mode: "cors", credentials: "omit", cache: "force-cache" });
+      if (r.ok) {
+        const blob = await r.blob();
+        const url = await blobToDataUrl(blob);
+        if (url) return url;
+      }
+    } catch (e) { /* segue pro proxy */ }
+
+    // Tentativa 2: fetch via proxy CORS publico
+    try {
+      const r = await fetch(CORS_PROXY + encodeURIComponent(src), { credentials: "omit" });
+      if (r.ok) {
+        const blob = await r.blob();
+        const url = await blobToDataUrl(blob);
+        if (url) return url;
+      }
+    } catch (e) { /* segue pro canvas */ }
+
+    return null;
+  };
+
+  const canvasAsDataUrl = (src) => new Promise((resolve) => {
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+    const tempImg = new Image();
+    tempImg.crossOrigin = "anonymous";
+    tempImg.onload = () => {
+      canvas.width = tempImg.naturalWidth || tempImg.width || 40;
+      canvas.height = tempImg.naturalHeight || tempImg.height || 40;
+      ctx.drawImage(tempImg, 0, 0);
+      try { resolve(canvas.toDataURL("image/png")); }
+      catch (e) { resolve(null); }
+    };
+    tempImg.onerror = () => resolve(null);
+    tempImg.src = src;
+  });
+
+  const waitForImgDecode = (img) => new Promise((resolve) => {
+    if (img.complete && img.naturalWidth > 0) return resolve();
+    const done = () => { img.onload = null; img.onerror = null; resolve(); };
+    img.onload = done;
+    img.onerror = done;
+    setTimeout(done, 2000);
+  });
+
   const convertImagesToBase64 = async (cloneNode) => {
     const images = cloneNode.querySelectorAll("img");
-    const promises = Array.from(images).map(img => {
-      return new Promise((resolve) => {
-        const src = img.src;
-        if (!src || src.startsWith("data:")) return resolve();
+    const promises = Array.from(images).map(async (img) => {
+      const src = img.src;
+      if (!src || src.startsWith("data:") || src.startsWith("blob:")) return;
 
-        const canvas = document.createElement("canvas");
-        const ctx = canvas.getContext("2d");
-        const tempImg = new Image();
-        tempImg.crossOrigin = "anonymous";
-        
-        tempImg.onload = () => {
-          canvas.width = tempImg.naturalWidth || tempImg.width || 40;
-          canvas.height = tempImg.naturalHeight || tempImg.height || 40;
-          ctx.drawImage(tempImg, 0, 0);
-          try {
-            img.src = canvas.toDataURL("image/png");
-          } catch (e) {
-            console.error(e);
-          }
-          resolve();
-        };
-        tempImg.onerror = () => resolve();
-        tempImg.src = src;
-      });
+      let dataUrl = await fetchAsDataUrl(src);
+      if (!dataUrl) dataUrl = await canvasAsDataUrl(src);
+
+      if (dataUrl) {
+        img.src = dataUrl;
+        await waitForImgDecode(img);
+      }
     });
     await Promise.all(promises);
   };
@@ -245,7 +293,7 @@ const ShareModule = (() => {
         html2canvas(printClone, {
           useCORS: true,
           allowTaint: false,
-          scale: 2, 
+          scale: 2,
           backgroundColor: "#fdfcf8",
           width: CAPTURE_WIDTH,
           height: CAPTURE_HEIGHT,
@@ -253,6 +301,7 @@ const ShareModule = (() => {
           windowHeight: CAPTURE_HEIGHT,
           scrollX: 0,
           scrollY: 0,
+          imageTimeout: 30000,
           logging: false
         }).then(canvas => {
           if (document.body.contains(printClone)) document.body.removeChild(printClone);
@@ -283,7 +332,7 @@ const ShareModule = (() => {
           console.error("Erro no html2canvas:", err);
           showToast("ERRO AO CAPTURAR TELA");
         });
-      }, 300);
+      }, 500);
     });
   }
 

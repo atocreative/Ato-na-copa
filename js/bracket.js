@@ -667,6 +667,13 @@ const BracketModule = (() => {
     render();
   }
 
+  function isComplete() {
+    return !!(
+      matches['final'] && matches['final'].winner &&
+      matches['third_place'] && matches['third_place'].winner
+    );
+  }
+
   return {
     init,
     evaluateRealtime,
@@ -678,5 +685,6 @@ const BracketModule = (() => {
     loadState,
     onChange,
     drawLines,
+    isComplete,
   };
 })();

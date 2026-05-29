@@ -27,18 +27,6 @@ function minifyJS(js) {
   return processedLines.join('\n');
 }
 
-// 3. Anti-clone wrapper — IIFE + debugger trap
-function wrapAntiClone(js) {
-  const buildId = Date.now().toString(36);
-  return '(function(){' +
-    'var _b="' + buildId + '";' +
-    'setInterval(function(){' +
-      'try{(function(){}).constructor("debugger")()}catch(e){}' +
-    '},3000);' +
-    '\n' + js + '\n' +
-  '})();';
-}
-
 const rootDir = __dirname;
 
 // Read and minify CSS
@@ -74,6 +62,5 @@ jsFiles.forEach(file => {
 
 const minJsPath = path.join(rootDir, 'js', 'app.min.js');
 const minJS = minifyJS(combinedJS);
-const protectedJS = wrapAntiClone(minJS);
-fs.writeFileSync(minJsPath, protectedJS, 'utf8');
-console.log('JS minificado e protegido! De: ' + combinedJS.length + ' bytes -> Para: ' + protectedJS.length + ' bytes');
+fs.writeFileSync(minJsPath, minJS, 'utf8');
+console.log('JS minificado com sucesso! De: ' + combinedJS.length + ' bytes -> Para: ' + minJS.length + ' bytes');

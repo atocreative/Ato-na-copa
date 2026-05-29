@@ -15,7 +15,6 @@ function showToast(message, duration = 2500) {
   }, duration);
 }
 
-// Lógica da Custom Modal
 function showConfirmModal(title, message) {
   return new Promise((resolve) => {
     const modal = document.getElementById('custom-modal');
@@ -26,7 +25,6 @@ function showConfirmModal(title, message) {
 
     titleEl.textContent = title;
     msgEl.textContent = message;
-
     modal.classList.add('active');
 
     function cleanup() {
@@ -34,16 +32,8 @@ function showConfirmModal(title, message) {
       btnCancel.removeEventListener('click', onCancel);
       btnConfirm.removeEventListener('click', onConfirm);
     }
-
-    function onCancel() {
-      cleanup();
-      resolve(false);
-    }
-
-    function onConfirm() {
-      cleanup();
-      resolve(true);
-    }
+    function onCancel()  { cleanup(); resolve(false); }
+    function onConfirm() { cleanup(); resolve(true); }
 
     btnCancel.addEventListener('click', onCancel);
     btnConfirm.addEventListener('click', onConfirm);
@@ -51,31 +41,58 @@ function showConfirmModal(title, message) {
 }
 
 (function App() {
+
+  // ── Limpa estado salvo a cada visita ──────────────────────────────────────
+  // O site sempre começa limpo. Sem isso, seleções antigas ficam restauradas
+  // e podem gerar prints com dados inconsistentes.
+  try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+
+  // ── Inicialização dos módulos ─────────────────────────────────────────────
   GroupsModule.init();
   BracketModule.init();
+  ShareModule.init(); // inicia prefetch de bandeiras em background
 
+  const btnShare = document.getElementById('btn-share');
+
+  // Começa desabilitado — só habilita quando bracket estiver completo
+  btnShare.disabled = true;
+  btnShare.title = 'Preencha todo o chaveamento para compartilhar';
+
+  function updateShareButton() {
+    const complete = BracketModule.isComplete();
+    btnShare.disabled = !complete;
+    btnShare.title = complete
+      ? 'Compartilhar minha simulação'
+      : 'Preencha todo o chaveamento para compartilhar';
+  }
+
+  // ── Reatividade ───────────────────────────────────────────────────────────
   GroupsModule.onChange((groupsState) => {
     ThirdsModule.evaluate(groupsState);
     const qualified = ThirdsModule.getQualified();
-
-    // Reatividade em tempo real para o chaveamento
     BracketModule.evaluateRealtime(groupsState, qualified);
-
-    saveState();
+    updateShareButton();
   });
 
   BracketModule.onChange(() => {
-    saveState();
-    ShareModule.preGenerate();
+    updateShareButton();
+    if (BracketModule.isComplete()) {
+      ShareModule.preGenerate();
+    }
   });
 
+  // ── Preencher aleatório ───────────────────────────────────────────────────
   document.getElementById('btn-fill-all').addEventListener('click', async () => {
-    // Para evitar preenchimento acidental se já houver dados
     const currentState = GroupsModule.getState();
-    const hasData = Object.keys(currentState).some(k => currentState[k].first || currentState[k].second || currentState[k].third);
-    
+    const hasData = Object.keys(currentState).some(
+      k => currentState[k].first || currentState[k].second || currentState[k].third
+    );
+
     if (hasData) {
-      const confirmed = await showConfirmModal('Preencher Aleatório', 'Isso irá sobrescrever suas escolhas atuais. Deseja continuar?');
+      const confirmed = await showConfirmModal(
+        'Preencher Aleatório',
+        'Isso irá sobrescrever suas escolhas atuais. Deseja continuar?'
+      );
       if (!confirmed) return;
     }
 
@@ -84,17 +101,20 @@ function showConfirmModal(title, message) {
     setTimeout(() => {
       BracketModule.fillRandomly();
       showToast('SIMULAÇÃO COMPLETA');
-      ShareModule.preGenerate();
-      
+      updateShareButton();
+      if (BracketModule.isComplete()) ShareModule.preGenerate();
+
       const bracketWrap = document.getElementById('bracket-wrap');
-      if (bracketWrap) {
-        bracketWrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
+      if (bracketWrap) bracketWrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 300);
   });
 
+  // ── Reiniciar ─────────────────────────────────────────────────────────────
   document.getElementById('btn-reset').addEventListener('click', async () => {
-    const confirmed = await showConfirmModal('Reiniciar Simulação', 'Tem certeza que deseja apagar todos os dados e começar do zero?');
+    const confirmed = await showConfirmModal(
+      'Reiniciar Simulação',
+      'Tem certeza que deseja apagar todos os dados e começar do zero?'
+    );
     if (!confirmed) return;
 
     GroupsModule.resetAll();
@@ -102,64 +122,18 @@ function showConfirmModal(title, message) {
     BracketModule.resetAll();
 
     document.getElementById('thirds-section').style.display = '';
-
     window.scrollTo({ top: 0, behavior: 'smooth' });
-
-    clearState();
+    updateShareButton();
     showToast('SIMULAÇÃO REINICIADA');
   });
 
-  document.getElementById('btn-share').addEventListener('click', () => {
+  // ── Compartilhar ──────────────────────────────────────────────────────────
+  btnShare.addEventListener('click', () => {
+    if (btnShare.disabled) {
+      showToast('⚠️ PREENCHA TODO O CHAVEAMENTO ANTES DE COMPARTILHAR', 3000);
+      return;
+    }
     ShareModule.share();
   });
 
-
-  function saveState() {
-    try {
-      const data = {
-        groups: GroupsModule.getState(),
-        bracket: BracketModule.getMatchesState(),
-        timestamp: Date.now(),
-      };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    } catch (e) {
-      // ignore
-    }
-  }
-
-  function clearState() {
-    try {
-      localStorage.removeItem(STORAGE_KEY);
-    } catch (e) { /* ignore */ }
-  }
-
-  function loadState() {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return;
-
-      const data = JSON.parse(raw);
-      if (!data || !data.groups) return;
-
-      GroupsModule.loadState(data.groups);
-
-      ThirdsModule.evaluate(data.groups);
-      const qualified = ThirdsModule.getQualified();
-      
-      BracketModule.evaluateRealtime(data.groups, qualified);
-
-      if (data.bracket) {
-        BracketModule.loadState(data.bracket);
-      }
-
-      document.getElementById('thirds-section').style.display = '';
-
-      showToast('SIMULAÇÃO RESTAURADA');
-      ShareModule.preGenerate();
-    } catch (e) {
-      console.warn('Failed to load saved state:', e);
-    }
-  }
-
-  loadState();
 })();

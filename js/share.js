@@ -8,12 +8,16 @@ const ShareModule = (() => {
   const CAPTURE_WIDTH = 1650;
   const CAPTURE_HEIGHT = 1050;
 
-  // ── PIPELINE DE BANDEIRAS (3 TENTATIVAS) ─────────────────────────────────
-  // Mobile (especialmente iOS Safari) tem problemas com crossOrigin+canvas:
-  // 1) fetch direto com CORS — funciona se o CDN serve Access-Control-Allow-Origin
-  // 2) fetch via proxy CORS — fallback pra CDNs sem CORS
-  // 3) canvas+crossOrigin — fallback final (pode falhar com SecurityError)
-  const CORS_PROXY = "https://corsproxy.io/?";
+  // ── PIPELINE DE BANDEIRAS ──────────────────────────────────────────────────
+  // Tentativas em ordem:
+  // 1) fetch direto com CORS
+  // 2) allorigins.win (proxy confiável para SVGs de CDN)
+  // 3) corsproxy.io como fallback
+  // Se tudo falhar, a bandeira fica cinza (aceitável)
+  const CORS_PROXIES = [
+    "https://api.allorigins.win/raw?url=",
+    "https://corsproxy.io/?",
+  ];
 
   const blobToDataUrl = (blob) => new Promise((resolve) => {
     const reader = new FileReader();
@@ -31,35 +35,43 @@ const ShareModule = (() => {
         const url = await blobToDataUrl(blob);
         if (url) return url;
       }
-    } catch (e) { /* segue pro proxy */ }
+    } catch (e) { /* continua */ }
 
-    // Tentativa 2: fetch via proxy CORS publico
-    try {
-      const r = await fetch(CORS_PROXY + encodeURIComponent(src), { credentials: "omit" });
-      if (r.ok) {
-        const blob = await r.blob();
-        const url = await blobToDataUrl(blob);
-        if (url) return url;
-      }
-    } catch (e) { /* segue pro canvas */ }
+    // Tentativas 2+: proxies CORS
+    for (const proxy of CORS_PROXIES) {
+      try {
+        const r = await fetch(proxy + encodeURIComponent(src), { credentials: "omit" });
+        if (r.ok) {
+          const blob = await r.blob();
+          const url = await blobToDataUrl(blob);
+          if (url) return url;
+        }
+      } catch (e) { /* continua */ }
+    }
 
     return null;
   };
 
-  const canvasAsDataUrl = (src) => new Promise((resolve) => {
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
-    const tempImg = new Image();
-    tempImg.crossOrigin = "anonymous";
-    tempImg.onload = () => {
-      canvas.width = tempImg.naturalWidth || tempImg.width || 40;
-      canvas.height = tempImg.naturalHeight || tempImg.height || 40;
-      ctx.drawImage(tempImg, 0, 0);
-      try { resolve(canvas.toDataURL("image/png")); }
-      catch (e) { resolve(null); }
+  // Converte data URL de SVG para PNG via canvas.
+  // html2canvas tem suporte limitado a SVG — PNG é mais confiável.
+  const svgDataUrlToPng = (dataUrl) => new Promise((resolve) => {
+    if (!dataUrl || !dataUrl.startsWith("data:image/svg")) return resolve(dataUrl);
+    const img = new Image();
+    img.onload = () => {
+      const w = Math.max(img.naturalWidth || img.width, 40);
+      const h = Math.max(img.naturalHeight || img.height, 30);
+      const c = document.createElement("canvas");
+      c.width = w;
+      c.height = h;
+      try {
+        c.getContext("2d").drawImage(img, 0, 0, w, h);
+        resolve(c.toDataURL("image/png"));
+      } catch (e) {
+        resolve(dataUrl); // fallback: mantém SVG
+      }
     };
-    tempImg.onerror = () => resolve(null);
-    tempImg.src = src;
+    img.onerror = () => resolve(dataUrl);
+    img.src = dataUrl;
   });
 
   const waitForImgDecode = (img) => new Promise((resolve) => {
@@ -77,7 +89,11 @@ const ShareModule = (() => {
       if (!src || src.startsWith("data:") || src.startsWith("blob:")) return;
 
       let dataUrl = await fetchAsDataUrl(src);
-      if (!dataUrl) dataUrl = await canvasAsDataUrl(src);
+
+      if (dataUrl) {
+        // Converte SVG → PNG para compatibilidade com html2canvas
+        dataUrl = await svgDataUrlToPng(dataUrl);
+      }
 
       if (dataUrl) {
         img.src = dataUrl;
@@ -125,7 +141,6 @@ const ShareModule = (() => {
         height: "100%",
         position: "relative"
       });
-      // Reseta todas as colunas laterais para fluxo natural
       Array.from(bracketInner.children).forEach(col => {
         if (col.classList.contains('bk-column')) {
           col.style.position = "relative";
@@ -144,13 +159,12 @@ const ShareModule = (() => {
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        justifyContent: "center", // Centraliza o conteúdo inteiro verticalmente
-        width: "350px", // Dá respiro pro miolo
+        justifyContent: "center",
+        width: "350px",
         position: "relative",
         zIndex: "50"
       });
 
-      // Se existir o stack, reseta ele também
       const stack = centerCol.querySelector('.bk-center-stack');
       if (stack) {
         Object.assign(stack.style, {
@@ -163,7 +177,6 @@ const ShareModule = (() => {
         });
       }
 
-      // Ajustes finos de espaçamento interno no miolo centralizado
       const trophyBox = centerCol.querySelector(".bk-trophy-box");
       const taçaImg = centerCol.querySelector(".bk-trophy");
       const championLine = centerCol.querySelector(".bk-champion-line");
@@ -177,12 +190,11 @@ const ShareModule = (() => {
           flexDirection: "column",
           alignItems: "center",
           bottom: "auto", left: "auto", transform: "none",
-          margin: "-90px 0 30px 0" // Move a taça e o texto mais pra cima ainda
+          margin: "-90px 0 30px 0"
         });
       }
 
       if (taçaImg) {
-        // Reduz o tamanho da taça conforme solicitado
         taçaImg.style.width = "75px";
         taçaImg.style.marginBottom = "8px";
       }
@@ -201,12 +213,10 @@ const ShareModule = (() => {
       if (finalWrap) {
         Object.assign(finalWrap.style, {
           position: "relative",
-          width: "210px", // Original site width (matches .bk-center width)
-          margin: "20px auto", // Centered within the 350px container
+          width: "210px",
+          margin: "20px auto",
           top: "auto", left: "auto", transform: "none"
         });
-        
-        // Garante que o titulo da final fique no fluxo
         const finalTitle = finalWrap.querySelector(".bk-round-title");
         if (finalTitle) {
           finalTitle.style.position = "relative";
@@ -218,12 +228,10 @@ const ShareModule = (() => {
       if (thirdWrap) {
         Object.assign(thirdWrap.style, {
           position: "relative",
-          width: "210px", // Original site width
-          margin: "30px auto 0 auto", // Centered
+          width: "210px",
+          margin: "30px auto 0 auto",
           top: "auto", left: "auto", transform: "none"
         });
-
-        // Garante que o titulo de terceiro fique no fluxo
         const thirdTitle = thirdWrap.querySelector(".bk-round-title");
         if (thirdTitle) {
           thirdTitle.style.position = "relative";
@@ -233,106 +241,109 @@ const ShareModule = (() => {
       }
     }
 
-    // ── 3. Marcas d'água (ATO no topo e Brasil no fundo) ────────
+    // ── 3. Marcas d'água ────────────────────────────────────────────────────
     const atoLogo = printClone.querySelector(".bk-ato-watermark");
     if (atoLogo) {
-      // Posiciona a logo da ATO absolutamente no topo do print
       Object.assign(atoLogo.style, {
         position: "absolute",
-        top: "40px", // Grudado no topo com um pequeno respiro
+        top: "40px",
         left: "50%",
         transform: "translateX(-50%)",
-        width: "160px", // Um pouco maior
+        width: "160px",
         height: "160px",
         opacity: "0.5",
         zIndex: "10"
       });
       printClone.appendChild(atoLogo);
     }
-    
+
     const watermarkImg = document.createElement('img');
     watermarkImg.src = 'pngwing.com.png';
     watermarkImg.className = "print-watermark";
     Object.assign(watermarkImg.style, {
-      position: "absolute", 
-      top: "50%", 
-      left: "50%", 
+      position: "absolute",
+      top: "50%",
+      left: "50%",
       transform: "translate(-50%, -50%)",
-      zIndex: "0", 
-      opacity: "0.1", // Conforme solicitado
+      zIndex: "0",
+      opacity: "0.1",
       width: "auto",
-      height: "80%", // Um pouco menor que antes
-      objectFit: "contain", 
+      height: "80%",
+      objectFit: "contain",
       pointerEvents: "none"
     });
     printClone.appendChild(watermarkImg);
 
-    // Forçar opacidade nas flags para nao sumirem
+    // Força opacidade das bandeiras
     printClone.querySelectorAll("img.bk-flag, img.bk-champ-flag, .flag-placeholder").forEach(el => {
       el.style.opacity = "1";
     });
 
     document.body.appendChild(printClone);
 
-    // Redesenha as linhas SVG após o layout estático assentar
-    if (typeof BracketModule !== 'undefined' && BracketModule.drawLines) {
-      BracketModule.drawLines(printClone);
-      
-      printClone.querySelectorAll('path[stroke]').forEach(line => {
-        line.style.opacity = '1';
-        line.setAttribute('opacity', '1');
-        if (parseFloat(line.getAttribute('stroke-width') || '0') < 1.8) {
-          line.setAttribute('stroke-width', '1.8');
-        }
-      });
-    }
-
-    // Converte imagens pra Base64 e captura
+    // ── 4. Converte imagens → Base64 (SVG convertido para PNG) ───────────────
+    // Depois desenha as linhas dentro de rAF para garantir layout computado
     convertImagesToBase64(printClone).then(() => {
-      setTimeout(() => {
-        html2canvas(printClone, {
-          useCORS: true,
-          allowTaint: false,
-          scale: 2,
-          backgroundColor: "#fdfcf8",
-          width: CAPTURE_WIDTH,
-          height: CAPTURE_HEIGHT,
-          windowWidth: CAPTURE_WIDTH,
-          windowHeight: CAPTURE_HEIGHT,
-          scrollX: 0,
-          scrollY: 0,
-          imageTimeout: 30000,
-          logging: false
-        }).then(canvas => {
-          if (document.body.contains(printClone)) document.body.removeChild(printClone);
-          
-          canvas.toBlob((blob) => {
-            if (!blob) { showToast("ERRO AO GERAR IMAGEM"); return; }
-            
-            const siteUrl = window.location.origin + window.location.pathname;
-            const file = new File([blob], 'minha-simulacao-copa-2026.png', { type: 'image/png' });
-            
-            const shareData = {
-              title: 'Minha Simulação da Copa do Mundo 2026',
-              text: '⚽ Olha a minha Simulação da Copa do Mundo 2026 feita pela Ato! Acabei de montar meu chaveamento, monte o seu também!',
-              url: siteUrl,
-              files: [file]
-            };
-            
-            if (navigator.canShare && navigator.canShare(shareData) && navigator.share) {
-              navigator.share(shareData)
-                .then(() => showToast("COMPARTILHADO COM SUCESSO!"))
-                .catch(err => { if (err.name !== 'AbortError') fallbackShare(blob, siteUrl); });
-            } else {
-              fallbackShare(blob, siteUrl);
+      requestAnimationFrame(() => {
+        // Desenha linhas APÓS o layout estar computado pelo browser
+        if (typeof BracketModule !== 'undefined' && BracketModule.drawLines) {
+          BracketModule.drawLines(printClone);
+
+          printClone.querySelectorAll('path[stroke]').forEach(line => {
+            line.style.opacity = '1';
+            line.setAttribute('opacity', '1');
+            if (parseFloat(line.getAttribute('stroke-width') || '0') < 1.8) {
+              line.setAttribute('stroke-width', '1.8');
             }
-          }, 'image/png');
-        }).catch(err => {
-          if (document.body.contains(printClone)) document.body.removeChild(printClone);
-          console.error("Erro no html2canvas:", err);
-          showToast("ERRO AO CAPTURAR TELA");
-        });
-      }, 500);
+          });
+        }
+
+        // Captura após as linhas estarem desenhadas
+        setTimeout(() => {
+          html2canvas(printClone, {
+            useCORS: true,
+            allowTaint: false,
+            scale: 2,
+            backgroundColor: "#fdfcf8",
+            width: CAPTURE_WIDTH,
+            height: CAPTURE_HEIGHT,
+            windowWidth: CAPTURE_WIDTH,
+            windowHeight: CAPTURE_HEIGHT,
+            scrollX: 0,
+            scrollY: 0,
+            imageTimeout: 30000,
+            logging: false
+          }).then(canvas => {
+            if (document.body.contains(printClone)) document.body.removeChild(printClone);
+
+            canvas.toBlob((blob) => {
+              if (!blob) { showToast("ERRO AO GERAR IMAGEM"); return; }
+
+              const siteUrl = window.location.origin + window.location.pathname;
+              const file = new File([blob], 'minha-simulacao-copa-2026.png', { type: 'image/png' });
+
+              const shareData = {
+                title: 'Minha Simulação da Copa do Mundo 2026',
+                text: '⚽ Olha a minha Simulação da Copa do Mundo 2026 feita pela Ato! Acabei de montar meu chaveamento, monte o seu também!',
+                url: siteUrl,
+                files: [file]
+              };
+
+              if (navigator.canShare && navigator.canShare(shareData) && navigator.share) {
+                navigator.share(shareData)
+                  .then(() => showToast("COMPARTILHADO COM SUCESSO!"))
+                  .catch(err => { if (err.name !== 'AbortError') fallbackShare(blob, siteUrl); });
+              } else {
+                fallbackShare(blob, siteUrl);
+              }
+            }, 'image/png');
+          }).catch(err => {
+            if (document.body.contains(printClone)) document.body.removeChild(printClone);
+            console.error("Erro no html2canvas:", err);
+            showToast("ERRO AO CAPTURAR TELA");
+          });
+        }, 400);
+      });
     });
   }
 
@@ -344,9 +355,9 @@ const ShareModule = (() => {
     link.click();
     document.body.removeChild(link);
     setTimeout(() => URL.revokeObjectURL(link.href), 150);
-    
+
     showToast("💾 IMAGEM SALVA! REDIRECIONANDO PARA O WHATSAPP...");
-    
+
     const baseText = "⚽ Olha a minha Simulação da Copa do Mundo 2026 feita pela Ato! Acabei de baixar a imagem do meu chaveamento, monte o seu também! ";
     setTimeout(() => window.open('https://wa.me/?text=' + encodeURIComponent(baseText + siteUrl), '_blank', 'noopener,noreferrer'), 1500);
   }

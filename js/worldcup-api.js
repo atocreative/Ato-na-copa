@@ -14,6 +14,23 @@
  * casar com a tela quando os grupos reais de 2026 estiverem em data.js E a API
  * tiver standings com playedGames > 0.
  */
+
+// ── Roteamento inteligente de WhatsApp (Deep Link) ───────────────────────────
+// Definida em escopo GLOBAL (fora da IIFE) para que o onclick inline do HTML
+// consiga chamá-la. No celular abre o app nativo; no desktop, o WhatsApp Web.
+function openWhatsApp(phone, message) {
+  const text = encodeURIComponent(message);
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+  if (isMobile) {
+    // Chama o aplicativo nativo diretamente no celular
+    window.location.href = 'whatsapp://send?phone=' + phone + '&text=' + text;
+  } else {
+    // Abre o WhatsApp Web em uma nova aba no Desktop
+    window.open('https://web.whatsapp.com/send?phone=' + phone + '&text=' + text, '_blank');
+  }
+}
+
 (function WorldCupLiveData() {
   'use strict';
 

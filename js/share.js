@@ -23,6 +23,7 @@ const ShareModule = (() => {
   let _cachedFile = null;
   let _generating  = false;
   let _genDebounce = null;
+  let _onReadyCb   = null; // callback chamado quando imagem fica pronta
 
   // ── Proxy de imagens ───────────────────────────────────────────────────────
   // images.weserv.nl: proxy CORS-safe com conversão SVG→PNG nativa
@@ -333,8 +334,6 @@ const ShareModule = (() => {
   }
 
   // ── Pré-geração em background ──────────────────────────────────────────────
-  // Chamado apenas quando bracket está completo (final + 3º lugar definidos).
-  // Debounce de 1.5s para não gerar durante sequência de cliques.
   function preGenerate() {
     clearTimeout(_genDebounce);
     _genDebounce = setTimeout(() => {
@@ -351,6 +350,8 @@ const ShareModule = (() => {
         if (blob) {
           _cachedBlob = blob;
           _cachedFile = new File([blob], 'minha-simulacao-copa-2026.png', { type: 'image/png' });
+          _overlayOnImageReady();
+          if (_onReadyCb) _onReadyCb(); // notifica App para atualizar o botão
         }
       }).catch(() => { _generating = false; });
     }, 1500);
@@ -411,45 +412,123 @@ const ShareModule = (() => {
     ), 1500);
   }
 
+  // ── Loading overlay ────────────────────────────────────────────────────────
+  function _showOverlay() {
+    const overlay   = document.getElementById('share-loading-overlay');
+    const status    = document.getElementById('slo-status');
+    const shareBtn  = document.getElementById('slo-share-btn');
+    const closeBtn  = document.getElementById('slo-close');
+    if (!overlay) return;
+
+    // Resetar para estado de loading
+    if (status)   { status.style.display = ''; }
+    if (shareBtn) { shareBtn.style.display = 'none'; }
+
+    // Botão fechar
+    if (closeBtn) {
+      closeBtn.onclick = _hideOverlay;
+    }
+
+    // Botão compartilhar (só disparado pelo usuário dentro do gesto)
+    if (shareBtn) {
+      shareBtn.onclick = () => {
+        if (_cachedBlob && _cachedFile) {
+          _hideOverlay();
+          doShare(_cachedBlob, _cachedFile);
+        }
+      };
+    }
+
+    overlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function _hideOverlay() {
+    const overlay = document.getElementById('share-loading-overlay');
+    if (!overlay) return;
+    overlay.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  // Chamado por preGenerate quando a imagem fica pronta enquanto overlay está aberto
+  function _overlayOnImageReady() {
+    const overlay  = document.getElementById('share-loading-overlay');
+    if (!overlay || !overlay.classList.contains('active')) return;
+    const status   = document.getElementById('slo-status');
+    const shareBtn = document.getElementById('slo-share-btn');
+    if (status)   { status.style.display = 'none'; }
+    if (shareBtn) { shareBtn.style.display = ''; }
+  }
+
   // ── API pública ────────────────────────────────────────────────────────────
-  function init() {
-    // Inicia prefetch de bandeiras em background (silencioso)
+  function init(onImageReady) {
+    _onReadyCb = onImageReady || null;
     prefetchAllFlags().catch(() => {});
   }
 
   function share() {
+    // Imagem em cache → share direto dentro do gesto (mantém contexto iOS)
     if (_cachedBlob && _cachedFile) {
-      // Imagem pronta → share imediato dentro do gesto → Share Sheet abre
       doShare(_cachedBlob, _cachedFile);
       return;
     }
 
+    // Já gerando em background (preGenerate) → mostra overlay e aguarda
     if (_generating) {
-      showToast('⏳ PREPARANDO IMAGEM... TENTE NOVAMENTE EM INSTANTES', 3000);
+      _showOverlay();
       return;
     }
 
-    // Imagem não está no cache (ex: usuário não mudou o bracket desde o load)
-    // Gera agora e pede para clicar novamente (necessário no iOS)
-    showToast('📸 PREPARANDO IMAGEM... TOQUE EM COMPARTILHAR NOVAMENTE', 4000);
+    // Não há cache e não está gerando → inicia geração e mostra overlay
+    _showOverlay();
     _generating = true;
     const clone = buildClone();
-    if (!clone) { _generating = false; showToast('ERRO AO GERAR IMAGEM'); return; }
+    if (!clone) {
+      _generating = false;
+      _hideOverlay();
+      showToast('ERRO AO GERAR IMAGEM');
+      return;
+    }
 
     captureClone(clone).then(blob => {
       _generating = false;
       if (blob) {
         _cachedBlob = blob;
         _cachedFile = new File([blob], 'minha-simulacao-copa-2026.png', { type: 'image/png' });
-        showToast('✅ IMAGEM PRONTA! TOQUE EM COMPARTILHAR.', 3500);
+        _overlayOnImageReady();
+        if (_onReadyCb) _onReadyCb();
       } else {
+        _hideOverlay();
         showToast('ERRO AO GERAR IMAGEM');
       }
     }).catch(() => {
       _generating = false;
+      _hideOverlay();
       showToast('ERRO AO CAPTURAR TELA');
     });
   }
 
-  return { init, share, preGenerate };
+  function clearCache() {
+    clearTimeout(_genDebounce);
+    _cachedBlob = null;
+    _cachedFile = null;
+    _generating = false;
+  }
+
+  function isImageReady() {
+    return !!(_cachedBlob && _cachedFile);
+  }
+
+  function closeOverlay() {
+    _hideOverlay();
+  }
+
+  function showDiscount() {
+    _showOverlay();
+    if (_cachedBlob && _cachedFile) {
+      _overlayOnImageReady();
+    }
+  }
+
+  return { init, share, preGenerate, clearCache, isImageReady, closeOverlay, showDiscount };
 })();

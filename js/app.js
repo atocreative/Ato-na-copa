@@ -50,21 +50,53 @@ function showConfirmModal(title, message) {
   // ── Inicialização dos módulos ─────────────────────────────────────────────
   GroupsModule.init();
   BracketModule.init();
-  ShareModule.init(); // inicia prefetch de bandeiras em background
 
   const btnShare = document.getElementById('btn-share');
+  const SHARE_LABEL_DEFAULT  = 'COMPARTILHAR';
+  const SHARE_LABEL_RECOVERY = 'VER MEU PALPITE / DESCONTO';
 
-  // Começa desabilitado — só habilita quando bracket estiver completo
-  btnShare.disabled = true;
-  btnShare.title = 'Preencha todo o chaveamento para compartilhar';
-
+  // ── Máquina de 3 estados do botão Compartilhar ───────────────────────────
+  // Estado 1 — BLOQUEADO: simulador incompleto
+  // Estado 2 — GERAÇÃO:   completo, sem imagem em cache
+  // Estado 3 — RECUPERAÇÃO: completo, imagem já gerada
   function updateShareButton() {
-    const complete = BracketModule.isComplete();
-    btnShare.disabled = !complete;
-    btnShare.title = complete
-      ? 'Compartilhar minha simulação'
-      : 'Preencha todo o chaveamento para compartilhar';
+    const complete  = BracketModule.isComplete();
+    const hasImage  = ShareModule.isImageReady();
+
+    if (!complete) {
+      // Estado 1: bloqueado
+      btnShare.disabled = true;
+      btnShare.dataset.shareState = 'blocked';
+      btnShare.title = 'Preencha todo o chaveamento para compartilhar';
+      _setShareLabel(SHARE_LABEL_DEFAULT);
+      return;
+    }
+
+    btnShare.disabled = false;
+
+    if (hasImage) {
+      // Estado 3: recuperação — abre overlay sem regerar
+      btnShare.dataset.shareState = 'recovery';
+      btnShare.title = 'Ver seu palpite e resgatar desconto';
+      _setShareLabel(SHARE_LABEL_RECOVERY);
+    } else {
+      // Estado 2: geração — gera imagem e abre overlay
+      btnShare.dataset.shareState = 'generate';
+      btnShare.title = 'Compartilhar minha simulação';
+      _setShareLabel(SHARE_LABEL_DEFAULT);
+    }
   }
+
+  function _setShareLabel(label) {
+    // Preserva o ícone SVG e substitui apenas o nó de texto
+    const btn = btnShare;
+    let textNode = null;
+    btn.childNodes.forEach(n => { if (n.nodeType === Node.TEXT_NODE && n.textContent.trim()) textNode = n; });
+    if (textNode) textNode.textContent = '\n      ' + label + '\n    ';
+  }
+
+  // ShareModule inicia após updateShareButton estar declarada
+  ShareModule.init(updateShareButton);
 
   // ── Reatividade ───────────────────────────────────────────────────────────
   GroupsModule.onChange((groupsState) => {
@@ -121,19 +153,46 @@ function showConfirmModal(title, message) {
     ThirdsModule.reset();
     BracketModule.resetAll();
 
+    // Blindagem: zera imagem e fecha modal (equivalente a setGeneratedImage(null) + setIsModalOpen(false))
+    ShareModule.clearCache();
+    ShareModule.closeOverlay();
+
+    // Esconde link de desconto até novo compartilhamento
+    const btnRediscount = document.getElementById('btn-rediscount');
+    if (btnRediscount) btnRediscount.classList.remove('visible');
+
     document.getElementById('thirds-section').style.display = '';
     window.scrollTo({ top: 0, behavior: 'smooth' });
     updateShareButton();
     showToast('SIMULAÇÃO REINICIADA');
   });
 
-  // ── Compartilhar ──────────────────────────────────────────────────────────
+  // ── Compartilhar — roteamento por estado ──────────────────────────────────
   btnShare.addEventListener('click', () => {
-    if (btnShare.disabled) {
-      showToast('⚠️ PREENCHA TODO O CHAVEAMENTO ANTES DE COMPARTILHAR', 3000);
+    if (btnShare.disabled) return;
+
+    const state = btnShare.dataset.shareState;
+
+    if (state === 'recovery') {
+      // Estado 3: imagem pronta — apenas abre overlay (sem regerar)
+      ShareModule.showDiscount();
       return;
     }
+
+    // Estado 2: gera imagem e abre overlay
     ShareModule.share();
+
+    // Exibe link de recuperação após o usuário iniciar o compartilhamento
+    const btnRediscount = document.getElementById('btn-rediscount');
+    if (btnRediscount) btnRediscount.classList.add('visible');
   });
+
+  // ── Pegar desconto novamente ──────────────────────────────────────────────
+  const btnRediscount = document.getElementById('btn-rediscount');
+  if (btnRediscount) {
+    btnRediscount.addEventListener('click', () => {
+      ShareModule.showDiscount();
+    });
+  }
 
 })();

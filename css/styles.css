@@ -124,13 +124,15 @@ button {
 .native-interstitial-banner {
   position: relative;
   width: 100%;
-  height: 220px;
+  min-height: 220px;
+  height: auto;
   background-color: #012562;
   display: flex;
   justify-content: center;
   align-items: center;
   overflow: hidden;
   font-family: 'Archivo', sans-serif;
+  padding: 24px 0;
 }
 
 .interstitial-block {
@@ -179,6 +181,61 @@ button {
   padding: 0 12px;
 }
 
+/* Offer layout — texto centralizado + imagens absolutas nas laterais */
+.interstitial-offer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 20px;
+  position: relative;
+  z-index: 5;
+}
+
+.interstitial-offer-text {
+  font-family: 'Archivo', sans-serif;
+  font-weight: 900;
+  font-style: normal;
+  font-size: clamp(1.4rem, 3.8vw, 2.8rem);
+  color: #fcc503;
+  text-transform: uppercase;
+  text-align: center;
+  line-height: 1.2;
+  white-space: normal;
+  max-width: 680px;
+}
+
+.interstitial-offer-text .highlight {
+  color: #39FF14;
+}
+
+.interstitial-bg-img {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 85%;
+  width: auto;
+  object-fit: contain;
+  object-position: bottom;
+  opacity: 0.6;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.interstitial-bg-img.img-left  { left: 0; }
+.interstitial-bg-img.img-right { right: 0; transform: translateY(-50%) scaleX(-1); }
+
+.interstitial-br { display: none; }
+
+@media (max-width: 900px) {
+  .interstitial-bg-img { opacity: 0.18; }
+  .interstitial-offer-text { font-size: clamp(1.1rem, 4.5vw, 1.8rem); max-width: 85%; }
+}
+
+@media (max-width: 480px) {
+  .interstitial-bg-img { display: none; }
+  .interstitial-br { display: inline; }
+}
+
 .word-ato, .word-mundo {
   color: #fcc302;
   font-weight: 900;
@@ -209,7 +266,9 @@ button {
    Aqui so reduzimos altura do banner em mobile. */
 @media (max-width: 768px) {
   .native-interstitial-banner {
-    height: 140px;
+    min-height: 140px;
+    height: auto !important;
+    padding: 16px 0;
   }
 }
 
@@ -253,13 +312,15 @@ button {
 .native-hero-banner {
   position: relative;
   width: 100%;
-  height: 360px;
+  min-height: 460px;
   background-color: #017a36;
   overflow: hidden;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  z-index: 1; /* Fundo base */
+  gap: 24px;
+  z-index: 1;
 }
 
 .native-hero-banner::before {
@@ -318,6 +379,29 @@ button {
   height: auto;
   display: block;
   filter: drop-shadow(5px 10px 15px rgba(0, 0, 0, 0.5));
+}
+
+/* Texto de incentivo sobre o fundo verde */
+.hero-discount-text {
+  position: relative;
+  z-index: 5;
+  font-family: 'Roboto', sans-serif;
+  font-size: clamp(1.2rem, 2.2vw, 1.5rem);
+  font-weight: 700;
+  color: #fcc503;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  line-height: 1.4;
+  max-width: 600px;
+  padding: 16px 24px 0;
+  margin: 0 auto;
+  text-shadow: 0.8538319886px 1.8085825763px #000000;
+}
+
+.hero-discount-highlight {
+  color: #ffffff;
+  font-weight: 900;
 }
 
 /* Wrapper for Crossed Stripes (Centralizados dentro do Side Block) */
@@ -385,11 +469,17 @@ button {
 @media (max-width: 1534px) {
   .native-hero-banner {
     height: auto;
-    min-height: 180px;
+    min-height: 220px;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    padding: 44px 0;
+    padding: 54px 16px;
+  }
+
+  .hero-discount-text {
+    font-size: clamp(1rem, 3.5vw, 1.3rem);
+    padding: 12px 12px 0;
+    max-width: 90%;
   }
 
   .hero-center-logo {
@@ -1029,6 +1119,10 @@ button {
   bottom: calc(100% + 30px);
   left: 50%;
   transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   text-align: center;
   width: 200px;
 }
@@ -1049,56 +1143,48 @@ button {
 }
 
 .bk-champion-line {
-  margin-top: 12px;
-  font-family: 'Roboto', sans-serif;
-  font-weight: 700;
-  letter-spacing: 2px;
-  font-size: 20px;
-  color: var(--color-green);
-  min-height: 28px;
-  text-transform: uppercase;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;   /* empilha bandeira → nome → CAMPEÃO */
+  align-items: center;       /* centraliza no eixo horizontal */
   justify-content: center;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: nowrap;
-  white-space: nowrap;
-  padding: 8px 20px;
-  background: rgba(2, 123, 53, 0.08);
-  border-radius: 6px !important;
-  min-width: 260px;
+  text-align: center;
+  gap: 6px;                  /* espaçamento entre bandeira e textos */
+  width: 100%;
+  background: transparent;   /* remove o fundo verde indesejado */
+  border: none;
+  box-shadow: none;
+  margin: 10px auto 0 auto;  /* centralizado sob a Taça */
 }
 
 .bk-champion-line .bk-champ-flag {
-  width: 48px;
-  height: 34px;
-  vertical-align: middle;
+  display: block;
+  width: 56px;
+  height: auto;
   border-radius: 4px !important;
-  margin-right: 0;
-  box-shadow: 0 0 0 2px var(--color-green) !important;
-  flex-shrink: 0;
+  margin: 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  object-fit: cover;
 }
 
 .bk-champ-name {
   font-family: 'Roboto', sans-serif;
   font-weight: 900;
-  font-size: 20px;
+  font-size: 22px;
   color: var(--color-green);
   text-transform: uppercase;
   letter-spacing: 2px;
   white-space: nowrap;
+  margin-top: 8px;
 }
 
 .bk-champ-title {
   font-family: 'Roboto', sans-serif;
-  font-weight: 700;
-  font-size: 16px;
-  color: var(--color-green);
+  font-weight: 600;
+  font-size: 12px;
+  color: #555;
   text-transform: uppercase;
-  letter-spacing: 2px;
+  letter-spacing: 0.2em;
   white-space: nowrap;
-  opacity: 0.9;
 }
 
 /* Final Match */
@@ -1189,6 +1275,29 @@ button {
   display: flex;
   justify-content: center;
   gap: var(--space-md);
+}
+
+.action-bar-extra {
+  position: fixed;
+  bottom: 64px;
+  left: 0;
+  right: 0;
+  z-index: 99;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.action-bar-extra .btn-rediscount {
+  pointer-events: auto;
+  background: rgba(1, 37, 98, 0.88);
+  color: #fcc503;
+  border: 1px solid #fcc503;
+  border-radius: 4px 4px 0 0;
+  font-size: 0.72rem;
+  padding: 5px 14px;
+  text-decoration: none;
+  letter-spacing: 0.06em;
 }
 
 .action-btn {
@@ -1413,7 +1522,7 @@ button {
 
 .album-cta p {
   font-family: 'Roboto', sans-serif;
-  font-size: clamp(0.95rem, 1.8vw, 1.15rem);
+  font-size: clamp(1.2rem, 2vw, 1.5rem);
   line-height: 1.6;
   color: #fdfcf8;
   max-width: 720px;
@@ -1605,24 +1714,18 @@ button {
     height: auto !important;
   }
 
-  /* Champion line fix */
+  /* Champion line fix — mobile */
   .bk-champion-line {
-    font-size: 14px;
-    gap: 8px;
-    padding: 6px 14px;
-    flex-wrap: nowrap;
-    white-space: nowrap;
-    min-width: 200px;
+    gap: 4px;
   }
   .bk-champ-name {
-    font-size: 14px;
+    font-size: 16px;
   }
   .bk-champ-title {
-    font-size: 12px;
+    font-size: 11px;
   }
   .bk-champion-line .bk-champ-flag {
-    width: 36px;
-    height: 24px;
+    width: 44px;
   }
 }
 
@@ -1792,5 +1895,280 @@ button {
   max-width: 800px;
   height: auto;
   object-fit: contain;
+}
+
+/* ═══════════════════════════
+   HERO DISCOUNT TEASER
+   ═══════════════════════════ */
+.hero-discount-teaser {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background-color: var(--color-yellow);
+  color: var(--color-blue);
+  padding: 14px 24px;
+  font-family: 'Roboto', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.hero-discount-teaser svg {
+  flex-shrink: 0;
+  color: var(--color-blue);
+}
+
+/* ═══════════════════════════
+   INTERSTITIAL DISCOUNT REMINDER
+   ═══════════════════════════ */
+.interstitial-discount-reminder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 24px;
+  font-family: 'Roboto', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--bg-global);
+  border-top: 1px solid rgba(253, 252, 248, 0.2);
+}
+
+.interstitial-discount-reminder svg {
+  flex-shrink: 0;
+  color: var(--color-yellow);
+}
+
+/* ═══════════════════════════
+   SHARE LOADING OVERLAY (LEAD CAPTURE)
+   ═══════════════════════════ */
+.share-loading-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(1, 37, 98, 0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+  padding: 24px;
+}
+
+.share-loading-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.share-loading-box {
+  background: var(--bg-global);
+  width: 100%;
+  max-width: 480px;
+  padding: 40px 32px;
+  border-radius: 4px;
+  text-align: center;
+  transform: translateY(20px);
+  transition: transform 0.25s ease;
+  border: 2px solid var(--color-yellow);
+}
+
+.share-loading-overlay.active .share-loading-box {
+  transform: translateY(0);
+}
+
+.slo-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Roboto', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-yellow);
+  background: var(--color-blue);
+  padding: 4px 12px;
+  border-radius: 2px;
+  margin-bottom: 20px;
+}
+
+.slo-title {
+  font-family: 'Archivo', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 900;
+  font-style: italic;
+  text-transform: uppercase;
+  color: var(--color-blue);
+  line-height: 1.15;
+  margin-bottom: 12px;
+}
+
+.slo-subtitle {
+  font-family: 'Roboto', sans-serif;
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 24px;
+}
+
+.slo-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background-color: var(--color-yellow);
+  color: var(--color-blue);
+  padding: 16px 28px;
+  border-radius: 4px;
+  font-family: 'Roboto', sans-serif;
+  font-weight: 900;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  text-decoration: none;
+  letter-spacing: 0.03em;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  margin-bottom: 28px;
+}
+
+.slo-cta-btn:hover {
+  background-color: #e5b102;
+  transform: translateY(-2px);
+}
+
+.slo-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.slo-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 16px 28px;
+  border-radius: 4px;
+  font-family: 'Roboto', sans-serif;
+  font-weight: 900;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  text-decoration: none;
+  letter-spacing: 0.03em;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  cursor: pointer;
+  border: none;
+  width: 100%;
+  max-width: 360px;
+}
+
+.slo-btn-wa {
+  background-color: var(--color-yellow);
+  color: var(--color-blue);
+}
+
+.slo-btn-wa:hover {
+  background-color: #e5b102;
+  transform: translateY(-2px);
+}
+
+.slo-btn-share {
+  background-color: #1d4ed8;
+  color: #ffffff;
+}
+
+.slo-btn-share:hover {
+  background-color: #1e40af;
+  transform: translateY(-2px);
+}
+
+.slo-close-btn {
+  display: inline-block;
+  background: none;
+  border: none;
+  font-family: 'Roboto', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 8px 0;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  margin-top: 4px;
+}
+
+.slo-close-btn:hover { color: var(--color-blue); }
+
+/* Link "pegar desconto novamente" abaixo do botão compartilhar */
+.btn-rediscount {
+  display: none;
+  background: none;
+  border: none;
+  font-family: 'Roboto', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-secondary);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  padding: 6px 12px;
+}
+
+.btn-rediscount.visible { display: inline-block; }
+.btn-rediscount:hover   { color: var(--color-blue); }
+
+.slo-loading-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Roboto', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+}
+
+.slo-spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(1, 37, 98, 0.2);
+  border-top-color: var(--color-blue);
+  border-radius: 50%;
+  animation: slo-spin 0.7s linear infinite;
+}
+
+@keyframes slo-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 480px) {
+  .share-loading-box {
+    padding: 28px 20px;
+  }
+  .slo-title {
+    font-size: 1.2rem;
+  }
+  .slo-cta-btn {
+    font-size: 0.82rem;
+    padding: 14px 18px;
+  }
+  .hero-discount-teaser {
+    font-size: 0.82rem;
+    padding: 12px 16px;
+    flex-wrap: wrap;
+  }
 }
 

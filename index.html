@@ -84,6 +84,10 @@
       <img src="image2vector.svg" alt="Logotipo Faça Seu Palpite" width="450" height="80" loading="eager" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'450\' height=\'80\'><text x=\'50%\' y=\'50%\' dominant-baseline=\'middle\' text-anchor=\'middle\' font-family=\'Arial\' font-size=\'40\' fill=\'white\' font-weight=\'bold\'>FAÇA SEU PALPITE</text></svg>'"/>
     </div>
 
+    <p class="hero-discount-text">
+      COMPLETE SEU PALPITE E DESBLOQUEIE <span class="hero-discount-highlight">ATÉ 20% DE DESCONTO</span> EM CAMISAS E FIGURINHAS.
+    </p>
+
     <!-- Faixa azul inferior (mobile only) -->
     <div class="hero-mobile-stripe hero-mobile-stripe-bottom">
       É HEXA ★ É HEXA ★ É HEXA ★ É HEXA ★ É HEXA ★ É HEXA
@@ -129,22 +133,24 @@
     <!-- ═══════ BANNER 2: INTERSTICIAL (NATIVO E ESTÁTICO) ═══════ -->
     <div class="native-interstitial-banner" style="margin-bottom: 2rem;">
       <div class="interstitial-block">
-        
+
         <!-- Linha Estática Superior -->
         <div class="interstitial-stripe top">
           ATO. ★ ATO. ★ ATO. ★ ATO. ★ ATO. ★ ATO. ★ ATO. ★ ATO. ★ ATO. ★ ATO. ★ ATO. ★ ATO.
         </div>
 
-        <!-- Texto Centralizado -->
-        <div class="interstitial-center">
-          <span class="word-ato">ATO</span><span class="word-dot">.</span> <span class="word-na">NA</span> <span class="word-copa">COPA</span> <span class="word-do">DO</span> <span class="word-mundo">MUNDO</span>
+        <!-- Conteúdo Central: Desconto + Imagens Laterais -->
+        <div class="interstitial-center interstitial-offer">
+          <img src="assets/camisa1.png" alt="" class="interstitial-bg-img img-left" aria-hidden="true" loading="lazy" />
+          <span class="interstitial-offer-text">GANHE <span class="highlight">ATÉ 20% DE DESCONTO</span><br class="interstitial-br"/> COMPLETANDO O SIMULADOR</span>
+          <img src="assets/figurinhas.png" alt="" class="interstitial-bg-img img-right" aria-hidden="true" loading="lazy" />
         </div>
 
         <!-- Linha Estática Inferior -->
         <div class="interstitial-stripe bottom">
           ATO. ★ ATO. ★ ATO. ★ ATO. ★ ATO. ★ ATO. ★ ATO. ★ ATO. ★ ATO. ★ ATO. ★ ATO. ★ ATO.
         </div>
-        
+
       </div>
     </div>
 
@@ -169,12 +175,11 @@
 
     <div class="cta-inner container">
       <div class="cta-content">
-        <h2>VAI COLECIONAR OU VESTIR O MANTO DA COPA?</h2>
-                <p>Oferta exclusiva para quem é de Brasília! Garanta ATÉ 20% DE DESCONTO a depender do produto e da quantidade na compra de figurinhas oficiais da Copa, álbuns ou camisas de futebol de seleções e clubes. Qualquer compra utilizando o simulador garante o seu desconto com total confiança.</p>
-                <a href="https://wa.me/556191995064?text=Ol%C3%A1%21+Vim+pelo+Simulador+da+Copa+da+Ato+e+quero+garantir+meu+desconto+de+at%C3%A9+20%25+em+produtos+da+Copa+e+camisas+de+futebol%21" target="_blank" rel="noopener noreferrer" class="cta-whatsapp-btn" aria-label="Falar no WhatsApp para garantir desconto no Álbum e Camisas da Copa">
-
+        <h2>VAI COLECIONAR FIGURINHAS OU VESTIR O MANTO DA COPA?</h2>
+        <p>Compre figurinhas oficiais, álbuns e camisas de seleções com a gente. Quer garantir até 20% de desconto no seu pedido? Suba a página, complete o seu simulador e libere o seu prêmio exclusivo! Se você já completou e pegou seu código, chame no botão abaixo.</p>
+        <a href="https://wa.me/556191995064?text=Oi%20me%20interessei%20pela%20figurinhas%20e%20camisa%20do%20brasil%20gostaria%20de%20saber%20os%20pre%C3%A7os" target="_blank" rel="noopener noreferrer" class="cta-whatsapp-btn" aria-label="Falar com vendedor no WhatsApp">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
-          GARANTIR MEU DESCONTO NO WHATSAPP
+          FALAR COM VENDEDOR
         </a>
       </div>
     </div>
@@ -203,9 +208,39 @@
       COMPARTILHAR
     </button>
   </div>
-
   <!-- ═══════ TOAST ═══════ -->
   <div class="toast" id="toast"></div>
+
+  <!-- ═══════ LOADING / DESCONTO OVERLAY ═══════ -->
+  <div class="share-loading-overlay" id="share-loading-overlay" aria-modal="true" role="dialog" aria-labelledby="slo-title">
+    <div class="share-loading-box">
+      <p class="slo-eyebrow">OFERTA DESBLOQUEADA</p>
+      <h2 class="slo-title" id="slo-title">Parabéns! Você desbloqueou até 20% de desconto.</h2>
+      <p class="slo-subtitle">Enquanto sua imagem é gerada, aproveite seu prêmio em camisas e figurinhas:</p>
+
+      <div class="slo-actions">
+        <!-- Botão WA: sempre visível -->
+        <a href="https://wa.me/556191995064?text=Ol%C3%A1%21%20Completei%20o%20simulador%20e%20vim%20resgatar%20meus%20descontos%20em%20camisas%20e%20figurinhas%21" target="_blank" rel="noopener noreferrer" class="slo-btn slo-btn-wa" aria-label="Resgatar desconto no WhatsApp">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          RESGATAR MEU DESCONTO
+        </a>
+
+        <!-- Botão Compartilhar: oculto até imagem pronta -->
+        <button id="slo-share-btn" class="slo-btn slo-btn-share" style="display:none;" aria-label="Compartilhar imagem do palpite">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+          COMPARTILHAR IMAGEM
+        </button>
+      </div>
+
+      <!-- Status do loading: some quando imagem fica pronta -->
+      <p class="slo-loading-status" id="slo-status">
+        <span class="slo-spinner" aria-hidden="true"></span>
+        Gerando sua imagem...
+      </p>
+
+      <button class="slo-close-btn" id="slo-close" aria-label="Fechar">FECHAR</button>
+    </div>
+  </div>
 
   <!-- ═══════ CUSTOM MODAL ═══════ -->
   <div class="modal-overlay" id="custom-modal">
@@ -222,6 +257,8 @@
   <!-- ═══════ SCRIPTS ═══════ -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
   <script src="js/app.min.js" defer></script>
+  <!-- Dados ao vivo (football-data.org) — roda após os grupos renderizarem -->
+  <script src="js/worldcup-api.js" defer></script>
 
 </body>
 

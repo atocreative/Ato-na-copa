@@ -354,7 +354,7 @@ button {
 }
 
 .side-block.left .stripe-wrapper {
-  left: 30%; /* Distancia a faixa do centro para a esquerda */
+  left: 20%; /* Empurra o vértice esquerdo do losango para o canto */
 }
 
 .side-block.right {
@@ -362,7 +362,7 @@ button {
 }
 
 .side-block.right .stripe-wrapper {
-  left: 70%; /* Distancia a faixa do centro para a direita */
+  left: 80%; /* Empurra o vértice direito do losango para o canto */
 }
 
 .hero-center-logo {
@@ -416,15 +416,15 @@ button {
   filter: drop-shadow(5px 10px 15px rgba(0, 0, 0, 0.5));
 }
 
-/* Eixo Descendente */
+/* Eixo Descendente — ângulo mais "reto" (vertical) para liberar o centro */
 .wrapper-desc {
-  transform: translate(-50%, -50%) rotate(-24deg);
+  transform: translate(-50%, -50%) rotate(-35deg);
   z-index: 1;
 }
 
-/* Eixo Ascendente */
+/* Eixo Ascendente — ângulo mais "reto" (vertical) para liberar o centro */
 .wrapper-asc {
-  transform: translate(-50%, -50%) rotate(24deg);
+  transform: translate(-50%, -50%) rotate(35deg);
   z-index: 2; /* Fica por cima do outro eixo */
 }
 

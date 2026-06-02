@@ -18,15 +18,29 @@
 // ── Roteamento inteligente de WhatsApp (Deep Link) ───────────────────────────
 // Definida em escopo GLOBAL (fora da IIFE) para que o onclick inline do HTML
 // consiga chamá-la. No celular abre o app nativo; no desktop, o WhatsApp Web.
-function openWhatsApp(phone, message) {
-  const text = encodeURIComponent(message);
-  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+function openWhatsApp(phone, message, buttonName) {
+  // 1. Dispara o evento para o Google Analytics
+  if (typeof gtag === 'function') {
+    gtag('event', 'click_whatsapp', {
+      'button_name': buttonName,
+      'plataforma': 'whatsapp'
+    });
+  }
 
-  if (isMobile) {
-    // Chama o aplicativo nativo diretamente no celular
+  const text = encodeURIComponent(message);
+  const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+  const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
+  const isAndroid = /android/i.test(userAgent);
+
+  // 2. Roteamento inteligente de link
+  if (isIOS) {
+    // iOS (inclusive Edge/Safari) funciona melhor com wa.me forçando o aplicativo
+    window.location.href = 'https://wa.me/' + phone + '?text=' + text;
+  } else if (isAndroid) {
+    // Android aceita o protocolo direto bem
     window.location.href = 'whatsapp://send?phone=' + phone + '&text=' + text;
   } else {
-    // Abre o WhatsApp Web em uma nova aba no Desktop
+    // Desktop
     window.open('https://web.whatsapp.com/send?phone=' + phone + '&text=' + text, '_blank');
   }
 }

@@ -467,6 +467,13 @@ const ShareModule = (() => {
   }
 
   function share() {
+    // Rastreia o clique no compartilhamento no Google Analytics (GA4)
+    if (typeof gtag === 'function') {
+      gtag('event', 'click_compartilhar', {
+        'content_type': 'imagem_palpite'
+      });
+    }
+
     // Imagem em cache → share direto dentro do gesto (mantém contexto iOS)
     if (_cachedBlob && _cachedFile) {
       doShare(_cachedBlob, _cachedFile);

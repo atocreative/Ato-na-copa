@@ -101,9 +101,26 @@ function showConfirmModal(title, message) {
   // ── Reatividade ───────────────────────────────────────────────────────────
   GroupsModule.onChange((groupsState) => {
     ThirdsModule.evaluate(groupsState);
-    const qualified = ThirdsModule.getQualified();
+    const qualified = ThirdsModule.isReady() ? ThirdsModule.getQualified() : [];
     BracketModule.evaluateRealtime(groupsState, qualified);
     updateShareButton();
+  });
+
+  // Quando o usuário completa os 8 terceiros, alimenta o bracket
+  ThirdsModule.onChange((qualifiedThirds) => {
+    if (ThirdsModule.isReady()) {
+      const groupsState = GroupsModule.getState();
+      BracketModule.evaluateRealtime(groupsState, qualifiedThirds);
+    }
+    updateShareButton();
+  });
+
+  // ── Sorteio Aleatório dos Terceiros ───────────────────────────────────────
+  document.addEventListener('click', (e) => {
+    const shuffleBtn = e.target.closest('#thirds-shuffle-btn');
+    if (shuffleBtn) {
+      ThirdsModule.randomDraw();
+    }
   });
 
   BracketModule.onChange(() => {
@@ -131,13 +148,23 @@ function showConfirmModal(title, message) {
     GroupsModule.shuffleAll();
 
     setTimeout(() => {
-      BracketModule.fillRandomly();
-      showToast('SIMULAÇÃO COMPLETA');
-      updateShareButton();
-      if (BracketModule.isComplete()) ShareModule.preGenerate();
+      // Auto-fill os 8 melhores terceiros via ranking
+      ThirdsModule.autoFill();
 
-      const bracketWrap = document.getElementById('bracket-wrap');
-      if (bracketWrap) bracketWrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      // Alimenta o bracket com os terceiros qualificados
+      const groupsState = GroupsModule.getState();
+      const qualified = ThirdsModule.getQualified();
+      BracketModule.evaluateRealtime(groupsState, qualified);
+
+      setTimeout(() => {
+        BracketModule.fillRandomly();
+        showToast('SIMULAÇÃO COMPLETA');
+        updateShareButton();
+        if (BracketModule.isComplete()) ShareModule.preGenerate();
+
+        const bracketWrap = document.getElementById('bracket-wrap');
+        if (bracketWrap) bracketWrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 150);
     }, 300);
   });
 

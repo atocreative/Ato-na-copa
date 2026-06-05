@@ -5,6 +5,7 @@
   "description": "Simulador da Copa do Mundo 2026 — frontend estático + backend Express (proxy/cache da football-data.org)",
   "scripts": {
     "start": "node server.js",
+    "dev": "node server.js",
     "build": "node build.js"
   },
   "dependencies": {

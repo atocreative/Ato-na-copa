@@ -846,7 +846,7 @@ button {
 }
 
 /* ═══════════════════════════
-   THIRDS PANEL
+   THIRDS PANEL (Interactive)
    ═══════════════════════════ */
 .thirds-section {
   padding: var(--space-xl) 0 var(--space-2xl);
@@ -855,10 +855,71 @@ button {
 .thirds-info {
   font-size: 0.85rem;
   color: var(--text-secondary);
-  margin-bottom: var(--space-xl);
+  margin-bottom: var(--space-md);
   padding: 0 var(--space-md);
+  line-height: 1.6;
 }
 
+.thirds-info strong {
+  color: var(--color-blue);
+}
+
+/* Controls bar: counter + shuffle button */
+.thirds-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-sm) var(--space-md);
+  margin-bottom: var(--space-md);
+  gap: var(--space-md);
+}
+
+.thirds-counter {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  padding: 6px 14px;
+  border: 1px solid var(--border-color);
+  background: transparent;
+  transition: all 0.25s ease;
+}
+
+.thirds-counter.complete {
+  background: var(--color-green);
+  color: var(--bg-global);
+  border-color: var(--color-green);
+}
+
+.thirds-shuffle-btn {
+  padding: 10px 18px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  background: transparent;
+  border: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.thirds-shuffle-btn:hover {
+  background: rgba(1, 37, 98, 0.05);
+  color: var(--color-blue);
+  border-color: var(--color-blue);
+}
+
+.thirds-shuffle-btn svg {
+  flex-shrink: 0;
+  stroke: currentColor;
+}
+
+/* Grid */
 .thirds-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -866,6 +927,7 @@ button {
   padding: 0 var(--space-md);
 }
 
+/* Card base */
 .third-card {
   display: flex;
   align-items: center;
@@ -874,18 +936,48 @@ button {
   background: transparent;
   border: 1px solid var(--border-color);
   opacity: 0.5;
+  transition: all 0.2s ease;
+  position: relative;
 }
 
+/* Selectable (clickable when 12 thirds available) */
+.third-card.selectable {
+  opacity: 0.7;
+  cursor: pointer;
+}
+
+.third-card.selectable:hover {
+  opacity: 1;
+  background: rgba(1, 37, 98, 0.04);
+  border-color: rgba(1, 37, 98, 0.3);
+  transform: translateY(-1px);
+}
+
+/* Selected / Qualified */
 .third-card.qualified {
   opacity: 1;
   border-color: var(--color-yellow);
-  background: rgba(252, 197, 3, 0.1);
+  background: rgba(252, 197, 3, 0.12);
+  border-width: 2px;
 }
 
+.third-card.qualified:hover {
+  background: rgba(252, 197, 3, 0.2);
+  border-color: var(--color-yellow);
+}
+
+/* Eliminated (not in the 8, when 8 are filled) */
 .third-card.eliminated {
-  opacity: 0.3;
+  opacity: 0.25;
+  filter: grayscale(60%);
 }
 
+.third-card.eliminated:hover {
+  opacity: 0.5;
+  filter: grayscale(20%);
+}
+
+/* Team name */
 .third-card .third-name {
   font-size: 1rem;
   font-weight: 500;
@@ -895,11 +987,23 @@ button {
   text-overflow: ellipsis;
 }
 
+/* Group label */
 .third-card .third-group {
   font-size: 0.75rem;
   font-weight: 700;
   color: var(--text-secondary);
   margin-left: auto;
+  flex-shrink: 0;
+}
+
+/* Checkmark indicator */
+.third-check {
+  font-size: 0.9rem;
+  font-weight: 900;
+  color: var(--color-green);
+  min-width: 18px;
+  text-align: center;
+  flex-shrink: 0;
 }
 
 /* ═══════════════════════════
@@ -1702,6 +1806,20 @@ button {
   }
   .third-card .third-name {
     font-size: 0.8rem;
+  }
+  .thirds-controls {
+    flex-direction: column;
+    gap: 8px;
+    align-items: stretch;
+  }
+  .thirds-counter {
+    text-align: center;
+    font-size: 0.78rem;
+  }
+  .thirds-shuffle-btn {
+    font-size: 0.75rem;
+    padding: 8px 12px;
+    justify-content: center;
   }
 
   .interstitial-center {
